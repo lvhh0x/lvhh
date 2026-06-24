@@ -1,10 +1,10 @@
 # MERIDIAN — 진행 상황 체크리스트
-> 각 항목 완료 시 `- [ ]` → `- [x]` 로 변경 후 커밋.
+> 각 항목 완료 시 `- [ ]` → `- [x]` 로 변경 후 코밋.
 > 새 세션 시작 시 이 파일로 현재 위치를 파악한다.
 
 ---
 
-## ✅ Phase 0 — 아키텍처 설계 & 문서화
+## ✅ Phase 0 — 아키텍첸 설계 & 문서화
 - [x] 원본 HTML 분석
 - [x] 기술 스택 결정 (Next.js 14, Vercel, Supabase)
 - [x] DB 현황 파악 (Supabase 테이블 18개 확인)
@@ -14,14 +14,21 @@
 
 ---
 
-## 🔲 Phase 1 — Next.js 프로젝트 초기화
-- [ ] `npx create-next-app@latest` 실행 (TypeScript, App Router)
-- [ ] `@supabase/supabase-js`, `@supabase/ssr` 설치
-- [ ] `.env.local` 생성 및 Supabase 키 설정
-- [ ] `.env.example` 생성 (값 없이 키 이름만)
-- [ ] 폴더 구조 생성 (components, lib, types, docs)
-- [ ] `types/stock.ts`, `types/company.ts`, `types/database.ts` 기본 타입
-- [ ] Vercel 배포 연결 확인
+## ✅ Phase 1 — Next.js 프로젝트 초기화
+- [x] `package.json` 생성 (next@14.2.35, supabase-js@2.108.2, ssr@0.12.0)
+- [x] `next.config.js` 생성
+- [x] `tsconfig.json` 생성 (strict mode)
+- [x] `.eslintrc.json` 생성
+- [x] `.gitignore` 생성
+- [x] `.env.example` 생성 (값 없이 키 이름만)
+- [x] `app/globals.css` 생성
+- [x] `app/layout.tsx` 생성 (메타데이터 + body)
+- [x] `app/page.tsx` 생성 (placeholder)
+- [x] `types/database.ts` 생성 (PalletType, OuterBoxType, InnerBoxType)
+- [x] `types/stock.ts` 생성 (StockConfig, PricePoint, Params, Result)
+- [x] `types/company.ts` 생성 (Product, Params, PalletLayer, Result)
+- [x] 폴더 구조 생성 (components/, lib/ 하위 폴더 8개)
+- [x] Vercel 배포 연결 확인 (GitHub push 후 자동 배포)
 
 ---
 
@@ -80,7 +87,7 @@
 ## 🔲 Phase 6 — DB 연동
 - [ ] `pallet_types` 실제 데이터 확인
 - [ ] `/api/pallets` → Supabase 연결 검증
-- [ ] per_layer 컬럼 추가 여부 사용자 결정
+- [ ] per_layer 컨럼 추가 여부 사용자 결정
 - [ ] 하드코딩 → DB 데이터 교체
 
 ---
@@ -97,7 +104,7 @@
 - [ ] Vercel 환경변수 전체 설정
 - [ ] `npm run build` 에러 없음
 - [ ] 전체 시나리오 테스트 (홈 → 주식 → 회사)
-- [ ] 모바일 뷰 확인
+- [ ] 모바일 븰 확인
 
 ---
 
@@ -106,3 +113,4 @@
 | 날짜 | Phase | 내용 | 담당 |
 |------|-------|------|------|
 | 2026-06-23 | Phase 0 | 전체 아키텍처 설계 & 문서화 | Claude Sonnet 4.6 |
+| 2026-06-24 | Phase 1 | Next.js 14 프로젝트 초기화 (next@14.2.35) | Claude Sonnet 4.6 |
