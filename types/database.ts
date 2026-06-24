@@ -43,3 +43,56 @@ export interface SimulationProductRow {
   name: string;
   per_box: number;
 }
+
+// ── Supabase 제네릭 타입 (LIB-02) ────────────────────────────────────────
+// createClient<Database>(...) 에서 사용.
+// Row 타입별로 분리 선언해 순환 참조 방지.
+
+type PalletTypeRow = {
+  id: number;
+  name: string | null;
+  length_mm: number | null;
+  width_mm: number | null;
+  height_mm: number | null;
+  weight_kg: number | null;
+  created_at: string | null;
+};
+
+type OuterBoxTypeRow = {
+  id: number;
+  name: string | null;
+  length_mm: number | null;
+  width_mm: number | null;
+  height_mm: number | null;
+  weight_kg: number | null;
+  created_at: string | null;
+};
+
+type InnerBoxTypeRow = {
+  id: number;
+  name: string | null;
+  dimensions_label: string | null;
+  created_at: string | null;
+};
+
+export type Database = {
+  public: {
+    Tables: {
+      pallet_types: {
+        Row: PalletTypeRow;
+        Insert: Omit<PalletTypeRow, 'id' | 'created_at'>;
+        Update: Partial<Omit<PalletTypeRow, 'id' | 'created_at'>>;
+      };
+      outer_box_types: {
+        Row: OuterBoxTypeRow;
+        Insert: Omit<OuterBoxTypeRow, 'id' | 'created_at'>;
+        Update: Partial<Omit<OuterBoxTypeRow, 'id' | 'created_at'>>;
+      };
+      inner_box_types: {
+        Row: InnerBoxTypeRow;
+        Insert: Omit<InnerBoxTypeRow, 'id' | 'created_at'>;
+        Update: Partial<Omit<InnerBoxTypeRow, 'id' | 'created_at'>>;
+      };
+    };
+  };
+};
