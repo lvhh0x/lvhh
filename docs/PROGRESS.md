@@ -4,7 +4,7 @@
 
 ---
 
-## ✅ Phase 0 — 아키텍쬼 설계 & 문서화
+## ✅ Phase 0 — 아키텍처 설계 & 문서화
 - [x] 원본 HTML 분석
 - [x] 기술 스택 결정 (Next.js 14, Vercel, Supabase)
 - [x] DB 현황 파악 (Supabase 테이블 18개 확인)
@@ -46,11 +46,11 @@
 ---
 
 ## 🔲 Phase 3 — 홈 페이지
-- [ ] `lib/svg/generators.ts` (→ FE-07)
-- [ ] `components/svg/LineSvg.tsx` (→ FE-07)
-- [ ] `components/svg/CandleSvg.tsx` (→ FE-07)
-- [ ] `components/svg/PalletSvg.tsx` (→ FE-07)
-- [ ] `components/svg/IconSvg.tsx` (→ FE-07)
+- [x] `lib/svg/generators.ts` (→ FE-07)
+- [x] `components/svg/LineSvg.tsx` (→ FE-07)
+- [x] `components/svg/CandleSvg.tsx` (→ FE-07)
+- [x] `components/svg/PalletSvg.tsx` (→ FE-07)
+- [x] `components/svg/IconSvg.tsx` (→ FE-07)
 - [ ] `components/home/HeroSection.tsx` (→ FE-02)
 - [ ] `components/home/EntryTiles.tsx` (→ FE-02)
 - [ ] `components/home/FeaturedStrategies.tsx` (→ FE-02)
@@ -117,3 +117,4 @@
 | 2026-06-23 | Phase 0 | 전체 아키텍처 설계 & 문서화 | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 1 | Next.js 14 프로젝트 초기화 (next@14.2.35) | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 2 | 공통 레이아웃 + 라우팅 (FE-01, LIB-02) | Claude Sonnet 4.6 |
+| 2026-06-25 | Phase 3-1 | SVG 엔진 구현 (FE-07: generators, LineSvg, CandleSvg, PalletSvg, IconSvg) | Claude Sonnet 4.6 |
