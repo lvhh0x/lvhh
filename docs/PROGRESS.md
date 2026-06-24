@@ -4,7 +4,7 @@
 
 ---
 
-## ✅ Phase 0 — 아키텍첸 설계 & 문서화
+## ✅ Phase 0 — 아키텍쬼 설계 & 문서화
 - [x] 원본 HTML 분석
 - [x] 기술 스택 결정 (Next.js 14, Vercel, Supabase)
 - [x] DB 현황 파악 (Supabase 테이블 18개 확인)
@@ -32,14 +32,16 @@
 
 ---
 
-## 🔲 Phase 2 — 공통 레이아웃 + 라우팅
-- [ ] `app/layout.tsx` — 폰트, 글로벌 스타일 (→ FE-01)
-- [ ] `lib/supabase/client.ts` (→ LIB-02)
-- [ ] `lib/supabase/server.ts` (→ LIB-02)
-- [ ] `components/layout/Ticker.tsx` (→ FE-01)
-- [ ] `components/layout/InnerHeader.tsx` (→ FE-01)
-- [ ] 라우팅 폴더 구조 생성
-- [ ] `npx tsc --noEmit` 확인
+## ✅ Phase 2 — 공통 레이아웃 + 라우팅
+- [x] `app/layout.tsx` — next/font/google 3종 폰트 + CSS 변수 (→ FE-01)
+- [x] `app/globals.css` — keyframe 애니메이션 + input 스타일 (→ FE-01)
+- [x] `lib/supabase/client.ts` (→ LIB-02)
+- [x] `lib/supabase/server.ts` (→ LIB-02)
+- [x] `types/database.ts` — Database 제네릭 타입 추가 (→ LIB-02)
+- [x] `components/layout/Ticker.tsx` (→ FE-01)
+- [x] `components/layout/InnerHeader.tsx` (→ FE-01)
+- [x] 라우팅 폴더 구조 생성 (stock/, company/ + [id] 폴더)
+- [x] `npx tsc --noEmit` 확인
 
 ---
 
@@ -104,7 +106,7 @@
 - [ ] Vercel 환경변수 전체 설정
 - [ ] `npm run build` 에러 없음
 - [ ] 전체 시나리오 테스트 (홈 → 주식 → 회사)
-- [ ] 모바일 븰 확인
+- [ ] 모바일 뷰 확인
 
 ---
 
@@ -114,3 +116,4 @@
 |------|-------|------|------|
 | 2026-06-23 | Phase 0 | 전체 아키텍처 설계 & 문서화 | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 1 | Next.js 14 프로젝트 초기화 (next@14.2.35) | Claude Sonnet 4.6 |
+| 2026-06-24 | Phase 2 | 공통 레이아웃 + 라우팅 (FE-01, LIB-02) | Claude Sonnet 4.6 |

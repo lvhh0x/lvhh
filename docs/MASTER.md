@@ -15,7 +15,7 @@
 | DB | Supabase 프로젝트 `lnnxjwfvzaelsoupozke` (ap-northeast-1, Tokyo) |
 | 접근 방식 | 공개 사이트 (로그인 없음) |
 | 원본 HTML | `시뮬레이션_데스크_럭셔리_dc.html` (이 파일이 레이아웃 기준) |
-| 현재 단계 | **Phase 0 완료 — 구조 설계 & 문서화 완료, 구현 미시작** |
+| 현재 단계 | **Phase 2 완료 — 공통 레이아웃 + 라우팅 완성** |
 
 ---
 
@@ -92,7 +92,7 @@ ribbon_types(18), label_specs(218), customers(64), delivery_routes(57), label_ba
 | outer_box_types | 2 | 외박스 규격 |
 | inner_box_types | 2 | 인박스 규격 |
 
-> ⚠️ pallet_types에 `per_layer` 컬럼 없음. BE-02 참조.
+> ⚠️ pallet_types에 `per_layer` 컨럼 없음. BE-02 참조.
 
 ### 🔲 추후 추가 예정 (사용자 지시 시에만)
 - `stock_simulations` — 주식 6종목 설정
@@ -106,7 +106,7 @@ ribbon_types(18), label_specs(218), customers(64), delivery_routes(57), label_ba
 
 | # | 모듈 | 핵심 파일 | 문서 | 상태 |
 |---|------|-----------|------|------|
-| FE-01 | 레이아웃 | components/layout/ | FE-01-layout.md | 🔴 미시작 |
+| FE-01 | 레이아웃 | components/layout/ | FE-01-layout.md | ✅ 완료 |
 | FE-02 | 홈 페이지 | components/home/, app/page.tsx | FE-02-home.md | 🔴 미시작 |
 | FE-03 | 주식 목록 | components/stock/StockCard.tsx | FE-03-stock-list.md | 🔴 미시작 |
 | FE-04 | 주식 시뮬레이션 실행 | components/stock/StockParams,Result.tsx | FE-04-stock-run.md | 🔴 미시작 |
@@ -119,7 +119,7 @@ ribbon_types(18), label_specs(218), customers(64), delivery_routes(57), label_ba
 | DB-01 | DB 스키마 | — | DB-01-schema.md | ✅ 완료 |
 | DB-02 | RLS 계획 | — | DB-02-rls-plan.md | 🟡 계획만 |
 | LIB-01 | 시뮬레이션 엔진 | lib/simulation/ | LIB-01-simulation.md | 🔴 미시작 |
-| LIB-02 | Supabase 클라이언트 | lib/supabase/ | LIB-02-supabase.md | 🔴 미시작 |
+| LIB-02 | Supabase 클라이언트 | lib/supabase/ | LIB-02-supabase.md | ✅ 완료 |
 
 ---
 
@@ -127,8 +127,8 @@ ribbon_types(18), label_specs(218), customers(64), delivery_routes(57), label_ba
 
 ```
 ✅ Phase 0 — 아키텍처 설계 & 문서화
-🔲 Phase 1 — Next.js 프로젝트 초기화
-🔲 Phase 2 — 공통 레이아웃 + 라우팅 (FE-01, LIB-02)
+✅ Phase 1 — Next.js 프로젝트 초기화
+✅ Phase 2 — 공통 레이아웃 + 라우팅 (FE-01, LIB-02)
 🔲 Phase 3 — 홈 페이지 (FE-02, FE-07)
 🔲 Phase 4 — 주식 시뮬레이션 (FE-03, FE-04, BE-01, LIB-01)
 🔲 Phase 5 — 회사 시뮬레이션 (FE-05, FE-06, BE-02, BE-03)
@@ -147,7 +147,7 @@ ribbon_types(18), label_specs(218), customers(64), delivery_routes(57), label_ba
 4. **모듈 분리** — 각 컴포넌트 독립 파일
 5. **타입 안전** — `any`/`unknown` 금지, 모든 인터페이스 types/ 폴더
 6. **typecheck 유지** — `npx tsc --noEmit` 항상 통과
-7. **작업 완료 시** — PROGRESS.md `[x]` 업데이트 후 커밋
+7. **작업 완료 시** — PROGRESS.md `[x]` 업데이트 후 코밋
 8. **새 모듈 추가 시** — 이 MASTER.md 모듈 목록 업데이트
 
 ---
@@ -175,4 +175,5 @@ const COLORS = {
   darkBg: '#0f0c0a',
 } as const;
 // Cormorant Garamond(serif) / Manrope(sans) / JetBrains Mono(mono)
+// CSS 변수: var(--font-cormorant) / var(--font-manrope) / var(--font-jetbrains-mono)
 ```
