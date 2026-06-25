@@ -4,7 +4,7 @@
 
 ---
 
-## ✅ Phase 0 — 아키텍처 설계 & 문서화
+## ✅ Phase 0 — 아키텍첸 설계 & 문서화
 - [x] 원본 HTML 분석
 - [x] 기술 스택 결정 (Next.js 14, Vercel, Supabase)
 - [x] DB 현황 파악 (Supabase 테이블 18개 확인)
@@ -95,10 +95,10 @@
 - [x] `app/api/backtest/route.ts`
 - [x] `npx tsc --noEmit` 통과 확인
 
-### Step 3 — 종목 목록 화면
-- [ ] `components/stock/StockCard.tsx`
-- [ ] `app/stock/page.tsx`
-- [ ] `npx tsc --noEmit` 통과
+### Step 3 — 종목 목록 화면 ✅
+- [x] `components/stock/StockCard.tsx`
+- [x] `app/stock/page.tsx`
+- [x] `npx tsc --noEmit` 통과
 
 ### Step 4 — 시뮬레이션 실행 화면
 - [ ] `components/stock/StockParams.tsx`
@@ -153,10 +153,11 @@
 
 | 날짜 | Phase | 내용 | 담당 |
 |------|-------|------|------|
-| 2026-06-23 | Phase 0 | 전체 아키텍처 설계 & 문서화 | Claude Sonnet 4.6 |
+| 2026-06-23 | Phase 0 | 전체 아키텍첸 설계 & 문서화 | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 1 | Next.js 14 프로젝트 초기화 (next@14.2.35) | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 2 | 공통 레이아웃 + 라우팅 (FE-01, LIB-02) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 3-1 | SVG 엔진 구현 (FE-07: generators, LineSvg, CandleSvg, PalletSvg, IconSvg) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 3-2 | 홈 페이지 구현 (FE-02: HeroSection, EntryTiles, FeaturedStrategies, StatsBand, QuoteFooter, page.tsx) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 4-Step1 | Python FastAPI 서버 구축 (20개 파일: app/ 10개 + api/ 6개 + 루트 4개) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 4-Step2 | TypeScript 타입 + Next.js API Route 4개 (types/backtest.ts, api/stocks, api/stocks/[id]/range, api/backtest) | Claude Sonnet 4.6 |
+| 2026-06-25 | Phase 4-Step3 | 종목 목록 화면 (FE-03: StockCard.tsx, app/stock/page.tsx) | Claude Sonnet 4.6 |
