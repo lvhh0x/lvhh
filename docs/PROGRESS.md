@@ -87,13 +87,13 @@
 - [ ] 로컈 검증: `cd python && uvicorn main:app` → `curl /health`
 - [ ] Railway/Render 배포
 
-### Step 2 — TypeScript 타입 & Next.js API Route
-- [ ] `types/backtest.ts`
-- [ ] `.env.local` 에 `PYTHON_SERVER_URL` 추가
-- [ ] `app/api/stocks/route.ts`
-- [ ] `app/api/stocks/[id]/range/route.ts`
-- [ ] `app/api/backtest/route.ts`
-- [ ] `npx tsc --noEmit` 통과 확인
+### Step 2 — TypeScript 타입 & Next.js API Route ✅
+- [x] `types/backtest.ts`
+- [ ] `.env.local` 에 `PYTHON_SERVER_URL` 추가 (로컈 작업 필요)
+- [x] `app/api/stocks/route.ts`
+- [x] `app/api/stocks/[id]/range/route.ts`
+- [x] `app/api/backtest/route.ts`
+- [x] `npx tsc --noEmit` 통과 확인
 
 ### Step 3 — 종목 목록 화면
 - [ ] `components/stock/StockCard.tsx`
@@ -159,3 +159,4 @@
 | 2026-06-25 | Phase 3-1 | SVG 엔진 구현 (FE-07: generators, LineSvg, CandleSvg, PalletSvg, IconSvg) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 3-2 | 홈 페이지 구현 (FE-02: HeroSection, EntryTiles, FeaturedStrategies, StatsBand, QuoteFooter, page.tsx) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 4-Step1 | Python FastAPI 서버 구축 (20개 파일: app/ 10개 + api/ 6개 + 루트 4개) | Claude Sonnet 4.6 |
+| 2026-06-25 | Phase 4-Step2 | TypeScript 타입 + Next.js API Route 4개 (types/backtest.ts, api/stocks, api/stocks/[id]/range, api/backtest) | Claude Sonnet 4.6 |
