@@ -61,15 +61,54 @@
 
 ---
 
-## 🔲 Phase 4 — 주식 시뮬레이션
-- [ ] `lib/simulation/stock.ts` (→ LIB-01)
-- [ ] `app/api/stocks/route.ts` (→ BE-01)
-- [ ] `components/stock/StockCard.tsx` (→ FE-03)
-- [ ] `app/stock/page.tsx` (→ FE-03)
-- [ ] `components/stock/StockParams.tsx` (→ FE-04)
-- [ ] `components/stock/StockResult.tsx` (→ FE-04)
-- [ ] `app/stock/[id]/page.tsx` (→ FE-04)
-- [ ] 주식 시뮬레이션 전체 흐름 확인
+## 🔲 Phase 4 — 주식 시뮬레이션 (Python FastAPI 서버 방식)
+
+### Step 1 — Python FastAPI 서버 ✅
+- [x] `python/app/__init__.py`
+- [x] `python/app/config_loader.py` (신규 작성)
+- [x] `python/app/models.py` (annual_dividend_krw 연도별 배당 필드 추가)
+- [x] `python/app/engine.py` (연도별 배당 추적 3곳 수정)
+- [x] `python/app/csv_io.py`
+- [x] `python/app/logging_setup.py`
+- [x] `python/app/paths.py`
+- [x] `python/app/xirr.py`
+- [x] `python/app/data_provider.py`
+- [x] `python/app/controller.py`
+- [x] `python/api/__init__.py`
+- [x] `python/api/schemas.py`
+- [x] `python/api/routes/__init__.py`
+- [x] `python/api/routes/health.py`
+- [x] `python/api/routes/stocks.py`
+- [x] `python/api/routes/backtest.py`
+- [x] `python/main.py`
+- [x] `python/requirements.txt`
+- [x] `python/Procfile`
+- [x] `python/config/config.ini.default`
+- [ ] 로컈 검증: `cd python && uvicorn main:app` → `curl /health`
+- [ ] Railway/Render 배포
+
+### Step 2 — TypeScript 타입 & Next.js API Route
+- [ ] `types/backtest.ts`
+- [ ] `.env.local` 에 `PYTHON_SERVER_URL` 추가
+- [ ] `app/api/stocks/route.ts`
+- [ ] `app/api/stocks/[id]/range/route.ts`
+- [ ] `app/api/backtest/route.ts`
+- [ ] `npx tsc --noEmit` 통과 확인
+
+### Step 3 — 종목 목록 화면
+- [ ] `components/stock/StockCard.tsx`
+- [ ] `app/stock/page.tsx`
+- [ ] `npx tsc --noEmit` 통과
+
+### Step 4 — 시뮬레이션 실행 화면
+- [ ] `components/stock/StockParams.tsx`
+- [ ] `components/stock/StockResult.tsx` (recharts 포함)
+- [ ] `app/stock/[id]/page.tsx`
+- [ ] `npx tsc --noEmit` 통과
+
+### Step 5 — 문서 업데이트
+- [ ] Phase 4 체크리스트 완료 처리
+- [ ] MASTER.md 모듈 상태 업데이트
 
 ---
 
@@ -89,13 +128,13 @@
 ## 🔲 Phase 6 — DB 연동
 - [ ] `pallet_types` 실제 데이터 확인
 - [ ] `/api/pallets` → Supabase 연결 검증
-- [ ] per_layer 컨럼 추가 여부 사용자 결정
+- [ ] per_layer 콜럼 추가 여부 사용자 결정
 - [ ] 하드코딩 → DB 데이터 교체
 
 ---
 
 ## 🔲 Phase 7 — 보안
-- [ ] RLS 정책 사용자 확인
+- [ ] RLS 정적 사용자 확인
 - [ ] 리본/라벨 테이블 RLS 활성화 + 차단
 - [ ] 시뮬레이션 테이블 RLS + SELECT 공개 허용
 - [ ] /api/pallets 정상 응답 확인
@@ -119,3 +158,4 @@
 | 2026-06-24 | Phase 2 | 공통 레이아웃 + 라우팅 (FE-01, LIB-02) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 3-1 | SVG 엔진 구현 (FE-07: generators, LineSvg, CandleSvg, PalletSvg, IconSvg) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 3-2 | 홈 페이지 구현 (FE-02: HeroSection, EntryTiles, FeaturedStrategies, StatsBand, QuoteFooter, page.tsx) | Claude Sonnet 4.6 |
+| 2026-06-25 | Phase 4-Step1 | Python FastAPI 서버 구축 (20개 파일: app/ 10개 + api/ 6개 + 루트 4개) | Claude Sonnet 4.6 |
