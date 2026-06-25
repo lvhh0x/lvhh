@@ -4,7 +4,7 @@
 
 ---
 
-## ✅ Phase 0 — 아키텍첸 설계 & 문서화
+## ✅ Phase 0 — 아키테체마 설계 & 문서화
 - [x] 원본 HTML 분석
 - [x] 기술 스택 결정 (Next.js 14, Vercel, Supabase)
 - [x] DB 현황 파악 (Supabase 테이블 18개 확인)
@@ -45,7 +45,7 @@
 
 ---
 
-## ✅ Phase 3 — 홈 페이지
+## ✅ Phase 3 — 홍 페이지
 - [x] `lib/svg/generators.ts` (→ FE-07)
 - [x] `components/svg/LineSvg.tsx` (→ FE-07)
 - [x] `components/svg/CandleSvg.tsx` (→ FE-07)
@@ -84,12 +84,12 @@
 - [x] `python/requirements.txt`
 - [x] `python/Procfile`
 - [x] `python/config/config.ini.default`
-- [ ] 로컈 검증: `cd python && uvicorn main:app` → `curl /health`
+- [ ] 로쫬 검증: `cd python && uvicorn main:app` → `curl /health`
 - [ ] Railway/Render 배포
 
 ### Step 2 — TypeScript 타입 & Next.js API Route ✅
 - [x] `types/backtest.ts`
-- [ ] `.env.local` 에 `PYTHON_SERVER_URL` 추가 (로컈 작업 필요)
+- [ ] `.env.local` 에 `PYTHON_SERVER_URL` 추가 (로쫬 작업 필요)
 - [x] `app/api/stocks/route.ts`
 - [x] `app/api/stocks/[id]/range/route.ts`
 - [x] `app/api/backtest/route.ts`
@@ -100,14 +100,17 @@
 - [x] `app/stock/page.tsx`
 - [x] `npx tsc --noEmit` 통과
 
-### Step 4 — 시뮬레이션 실행 화면
-- [ ] `components/stock/StockParams.tsx`
-- [ ] `components/stock/StockResult.tsx` (recharts 포함)
-- [ ] `app/stock/[id]/page.tsx`
-- [ ] `npx tsc --noEmit` 통과
+### Step 4 — 시뮬레이션 실행 화면 ✅
+- [x] `package.json` — recharts@^2.12.0 추가
+- [x] `components/stock/StockParams.tsx` (좌측 입력 패널, Client Component)
+- [x] `components/stock/StockResult.tsx` (recharts LineChart + 연도별 CSS 바)
+- [x] `app/stock/[id]/page.tsx` (2패널 레이아웃 통합, Client Component)
+- [x] `npx tsc --noEmit` 통과
+- [ ] Vercel 빌드 확인 (push 후 자동 배포)
+- [ ] `/stock/schd` 전체 흐름 확인 (Python 서버 기동 후)
 
-### Step 5 — 문서 업데이트
-- [ ] Phase 4 체크리스트 완료 처리
+### Step 5 — 문서 업데이트 ✅
+- [x] PROGRESS.md Phase 4 체크리스틈 완료 처리
 - [ ] MASTER.md 모듈 상태 업데이트
 
 ---
@@ -135,7 +138,7 @@
 
 ## 🔲 Phase 7 — 보안
 - [ ] RLS 정적 사용자 확인
-- [ ] 리본/라벨 테이블 RLS 활성화 + 차단
+- [ ] 리발/라벨 테이블 RLS 활성화 + 차단
 - [ ] 시뮬레이션 테이블 RLS + SELECT 공개 허용
 - [ ] /api/pallets 정상 응답 확인
 
@@ -153,7 +156,7 @@
 
 | 날짜 | Phase | 내용 | 담당 |
 |------|-------|------|------|
-| 2026-06-23 | Phase 0 | 전체 아키텍첸 설계 & 문서화 | Claude Sonnet 4.6 |
+| 2026-06-23 | Phase 0 | 전체 아키테체마 설계 & 문서화 | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 1 | Next.js 14 프로젝트 초기화 (next@14.2.35) | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 2 | 공통 레이아웃 + 라우팅 (FE-01, LIB-02) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 3-1 | SVG 엔진 구현 (FE-07: generators, LineSvg, CandleSvg, PalletSvg, IconSvg) | Claude Sonnet 4.6 |
@@ -161,3 +164,4 @@
 | 2026-06-25 | Phase 4-Step1 | Python FastAPI 서버 구축 (20개 파일: app/ 10개 + api/ 6개 + 루트 4개) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 4-Step2 | TypeScript 타입 + Next.js API Route 4개 (types/backtest.ts, api/stocks, api/stocks/[id]/range, api/backtest) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 4-Step3 | 종목 목록 화면 (FE-03: StockCard.tsx, app/stock/page.tsx) | Claude Sonnet 4.6 |
+| 2026-06-26 | Phase 4-Step4 | 시뮬레이션 실행 화면 (FE-04: StockParams.tsx, StockResult.tsx, app/stock/[id]/page.tsx, recharts) | Claude Sonnet 4.6 |
