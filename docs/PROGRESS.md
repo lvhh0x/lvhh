@@ -45,18 +45,18 @@
 
 ---
 
-## 🔲 Phase 3 — 홈 페이지
+## ✅ Phase 3 — 홈 페이지
 - [x] `lib/svg/generators.ts` (→ FE-07)
 - [x] `components/svg/LineSvg.tsx` (→ FE-07)
 - [x] `components/svg/CandleSvg.tsx` (→ FE-07)
 - [x] `components/svg/PalletSvg.tsx` (→ FE-07)
 - [x] `components/svg/IconSvg.tsx` (→ FE-07)
-- [ ] `components/home/HeroSection.tsx` (→ FE-02)
-- [ ] `components/home/EntryTiles.tsx` (→ FE-02)
-- [ ] `components/home/FeaturedStrategies.tsx` (→ FE-02)
-- [ ] `components/home/StatsBand.tsx` (→ FE-02)
-- [ ] `components/home/QuoteFooter.tsx` (→ FE-02)
-- [ ] `app/page.tsx` — 홈 통합 (→ FE-02)
+- [x] `components/home/HeroSection.tsx` (→ FE-02)
+- [x] `components/home/EntryTiles.tsx` (→ FE-02)
+- [x] `components/home/FeaturedStrategies.tsx` (→ FE-02)
+- [x] `components/home/StatsBand.tsx` (→ FE-02)
+- [x] `components/home/QuoteFooter.tsx` (→ FE-02)
+- [x] `app/page.tsx` — 홈 통합 (→ FE-02)
 - [ ] 홈 화면 브라우저 확인
 
 ---
@@ -118,3 +118,4 @@
 | 2026-06-24 | Phase 1 | Next.js 14 프로젝트 초기화 (next@14.2.35) | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 2 | 공통 레이아웃 + 라우팅 (FE-01, LIB-02) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 3-1 | SVG 엔진 구현 (FE-07: generators, LineSvg, CandleSvg, PalletSvg, IconSvg) | Claude Sonnet 4.6 |
+| 2026-06-25 | Phase 3-2 | 홈 페이지 구현 (FE-02: HeroSection, EntryTiles, FeaturedStrategies, StatsBand, QuoteFooter, page.tsx) | Claude Sonnet 4.6 |
