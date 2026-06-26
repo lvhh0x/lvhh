@@ -1,20 +1,21 @@
-// FE-03 — 종목 목록 화면 (Server Component)
+// FE-03 — 시뮬레이션 선택 화면 (Server Component)
+// 그리드는 lib/stock/tiles.ts(SIM_TILES) 단일 소스가 구동.
 import type { Metadata } from 'next';
-import { STOCK_CONFIGS } from '@/lib/stock/configs';
+import { SIM_TILES } from '@/lib/stock/tiles';
 import InnerHeader from '@/components/layout/InnerHeader';
-import StockCard from '@/components/stock/StockCard';
+import SimTile from '@/components/stock/SimTile';
 
 export const metadata: Metadata = {
   title: 'Stock Simulation — MERIDIAN',
 };
 
 export default async function StockPage() {
-  const stocks = STOCK_CONFIGS;
+  const tiles = SIM_TILES;
 
   return (
     <>
       <style>{`
-        .stock-card:hover { border-color: #C9A86A !important; }
+        .sim-tile:hover { border-color: #C9A86A !important; }
         .stock-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -32,7 +33,7 @@ export default async function StockPage() {
         backLabel="홈으로"
         backHref="/"
         crumbA="STOCK SIMULATION"
-        crumbB="종목 선택"
+        crumbB="시뮬레이션 선택"
       />
 
       <div
@@ -65,14 +66,14 @@ export default async function StockPage() {
               letterSpacing: '0.02em',
             }}
           >
-            종목을 선택하여 백테스트를 시작하세요
+            시뮬레이션 유형을 선택하세요
           </p>
         </div>
 
-        {/* 종목 카드 그리드 */}
+        {/* 시뮬레이션 타일 그리드 */}
         <div className="stock-grid">
-          {stocks.map((stock) => (
-            <StockCard key={stock.id} stock={stock} />
+          {tiles.map((tile) => (
+            <SimTile key={tile.id} tile={tile} />
           ))}
         </div>
       </div>
