@@ -15,7 +15,7 @@
 | DB | Supabase 프로젝트 `lnnxjwfvzaelsoupozke` (ap-northeast-1, Tokyo) |
 | 접근 방식 | 공개 사이트 (로그인 없음) |
 | 원본 HTML | `시뮬레이션_데스크_럭셔리_dc.html` (이 파일이 레이아웃 기준) |
-| 현재 단계 | **Phase 2 완료 — 공통 레이아웃 + 라우팅 완성** |
+| 현재 단계 | **Phase 4.5 완료 — 주식 시뮬레이션(ETF 그리드 + 직접입력 + 조회 UX) 완성. 다음: Phase 5 회사 시뮬레이션** |
 
 ---
 
@@ -40,8 +40,9 @@ lvhh/
 │   ├── layout.tsx
 │   ├── page.tsx                        # / → 홈
 │   ├── stock/
-│   │   ├── page.tsx                    # /stock → 주식 목록
-│   │   └── [id]/page.tsx               # /stock/[id] → 주식 실행
+│   │   ├── page.tsx                    # /stock → 시뮬레이션 타일 그리드
+│   │   ├── etf/page.tsx                # /stock/etf → ETF 직접입력 실행
+│   │   └── [id]/page.tsx               # /stock/[id] → 종목 실행(유휴, 보존)
 │   ├── company/
 │   │   ├── page.tsx                    # /company → 회사 목록
 │   │   └── [id]/page.tsx               # /company/[id] → 회사 실행
@@ -52,11 +53,12 @@ lvhh/
 ├── components/
 │   ├── layout/ (InnerHeader, Ticker)
 │   ├── home/ (HeroSection, EntryTiles, FeaturedStrategies, StatsBand, QuoteFooter)
-│   ├── stock/ (StockCard, StockParams, StockResult)
+│   ├── stock/ (SimTile, StockCard, StockParams, StockResult)
 │   ├── company/ (CompanyCard, CompanyParams, CompanyResult)
 │   └── svg/ (LineSvg, CandleSvg, PalletSvg, IconSvg)
 ├── lib/
 │   ├── simulation/ (stock.ts, company.ts)
+│   ├── stock/ (tiles.ts, configs.ts)
 │   ├── svg/ (generators.ts)
 │   └── supabase/ (client.ts, server.ts)
 ├── types/ (stock.ts, company.ts, database.ts)
@@ -74,6 +76,7 @@ lvhh/
 NEXT_PUBLIC_SUPABASE_URL=https://lnnxjwfvzaelsoupozke.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
 SUPABASE_SERVICE_ROLE_KEY=<service_role key>  # 서버 전용, 절대 클라이언트 노출 금지
+PYTHON_SERVER_URL=https://meridian-production-e345.up.railway.app  # 서버 전용(NEXT_PUBLIC 금지)
 ```
 
 ---
@@ -107,13 +110,13 @@ ribbon_types(18), label_specs(218), customers(64), delivery_routes(57), label_ba
 | # | 모듈 | 핵심 파일 | 문서 | 상태 |
 |---|------|-----------|------|------|
 | FE-01 | 레이아웃 | components/layout/ | FE-01-layout.md | ✅ 완료 |
-| FE-02 | 홈 페이지 | components/home/, app/page.tsx | FE-02-home.md | 🔴 미시작 |
-| FE-03 | 주식 목록 | components/stock/StockCard.tsx | FE-03-stock-list.md | 🔴 미시작 |
-| FE-04 | 주식 시뮬레이션 실행 | components/stock/StockParams,Result.tsx | FE-04-stock-run.md | 🔴 미시작 |
+| FE-02 | 홈 페이지 | components/home/, app/page.tsx | FE-02-home.md | ✅ 완료 |
+| FE-03 | 주식 목록/그리드 | components/stock/SimTile.tsx, lib/stock/tiles.ts, app/stock/page.tsx | FE-03-stock-list.md | ✅ 완료 |
+| FE-04 | 주식 시뮬레이션 실행 | components/stock/StockParams,Result.tsx, app/stock/etf, app/stock/[id] | FE-04-stock-run.md | ✅ 완료 |
 | FE-05 | 회사 목록 | components/company/CompanyCard.tsx | FE-05-company-list.md | 🔴 미시작 |
 | FE-06 | 회사 시뮬레이션 실행 | components/company/CompanyParams,Result.tsx | FE-06-company-run.md | 🔴 미시작 |
-| FE-07 | SVG 엔진 | components/svg/, lib/svg/generators.ts | FE-07-svg-engines.md | 🔴 미시작 |
-| BE-01 | API: 주식 목록 | app/api/stocks/route.ts | BE-01-api-stocks.md | 🔴 미시작 |
+| FE-07 | SVG 엔진 | components/svg/, lib/svg/generators.ts | FE-07-svg-engines.md | ✅ 완료 |
+| BE-01 | API: 주식 (목록/range/backtest) | app/api/stocks, api/stocks/[id]/range, api/backtest | BE-01-api-stocks.md | ✅ 완료 |
 | BE-02 | API: 팔레트 (DB) | app/api/pallets/route.ts | BE-02-api-pallets.md | 🔴 미시작 |
 | BE-03 | API: 제품 | app/api/products/route.ts | BE-03-api-products.md | 🔴 미시작 |
 | DB-01 | DB 스키마 | — | DB-01-schema.md | ✅ 완료 |
@@ -129,8 +132,9 @@ ribbon_types(18), label_specs(218), customers(64), delivery_routes(57), label_ba
 ✅ Phase 0 — 아키텍처 설계 & 문서화
 ✅ Phase 1 — Next.js 프로젝트 초기화
 ✅ Phase 2 — 공통 레이아웃 + 라우팅 (FE-01, LIB-02)
-🔲 Phase 3 — 홈 페이지 (FE-02, FE-07)
-🔲 Phase 4 — 주식 시뮬레이션 (FE-03, FE-04, BE-01, LIB-01)
+✅ Phase 3 — 홈 페이지 (FE-02, FE-07)
+✅ Phase 4 — 주식 시뮬레이션 (FE-03, FE-04, BE-01) — Python FastAPI(Railway) 연동
+✅ Phase 4.5 — ETF 그리드 재설계 + 직접입력 + 조회 3-상태 UX
 🔲 Phase 5 — 회사 시뮬레이션 (FE-05, FE-06, BE-02, BE-03)
 🔲 Phase 6 — DB 연동
 🔲 Phase 7 — 보안 (RLS)

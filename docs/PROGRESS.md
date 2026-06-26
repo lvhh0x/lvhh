@@ -61,7 +61,7 @@
 
 ---
 
-## 🔲 Phase 4 — 주식 시뮬레이션 (Python FastAPI 서버 방식)
+## ✅ Phase 4 — 주식 시뮬레이션 (Python FastAPI 서버 방식)
 
 ### Step 1 — Python FastAPI 서버 ✅
 - [x] `python/app/__init__.py`
@@ -85,11 +85,11 @@
 - [x] `python/Procfile`
 - [x] `python/config/config.ini.default`
 - [ ] 로쫬 검증: `cd python && uvicorn main:app` → `curl /health`
-- [ ] Railway/Render 배포
+- [x] Railway/Render 배포 → `https://meridian-production-e345.up.railway.app`
 
 ### Step 2 — TypeScript 타입 & Next.js API Route ✅
 - [x] `types/backtest.ts`
-- [ ] `.env.local` 에 `PYTHON_SERVER_URL` 추가 (로쫬 작업 필요)
+- [x] Vercel `PYTHON_SERVER_URL` 설정 + Redeploy 완료
 - [x] `app/api/stocks/route.ts`
 - [x] `app/api/stocks/[id]/range/route.ts`
 - [x] `app/api/backtest/route.ts`
@@ -106,12 +106,39 @@
 - [x] `components/stock/StockResult.tsx` (recharts LineChart + 연도별 CSS 바)
 - [x] `app/stock/[id]/page.tsx` (2패널 레이아웃 통합, Client Component)
 - [x] `npx tsc --noEmit` 통과
-- [ ] Vercel 빌드 확인 (push 후 자동 배포)
+- [x] Vercel 빌드 확인 (push 후 자동 배포)
 - [ ] `/stock/schd` 전체 흐름 확인 (Python 서버 기동 후)
 
 ### Step 5 — 문서 업데이트 ✅
 - [x] PROGRESS.md Phase 4 체크리스틈 완료 처리
-- [ ] MASTER.md 모듈 상태 업데이트
+- [x] MASTER.md 모듈 상태 업데이트
+
+---
+
+## ✅ Phase 4.5 — ETF 그리드 재설계 + 직접입력 + 조회 UX
+
+> 선행: `/stock` 서버 self-fetch 500 버그는 커밋 `4830f81`에서 수정 완료.
+
+### Step 1 — ETF 그리드 재설계 (요청 ①) ✅ — 커밋 `f7255f8`
+- [x] `lib/stock/tiles.ts` (그리드 6칸 단일 소스: ETF 시뮬레이션 활성 + ETF 비교/스위칭/준비중×3 비활성)
+- [x] `components/stock/SimTile.tsx` (active = Link / coming-soon = dim div)
+- [x] `app/stock/page.tsx` 타일 기반 그리드로 전환
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬)
+
+### Step 2 — 직접입력 화면 + range 3-상태 (요청 ①②) ✅ — 커밋 `38c83cf`
+- [x] `app/stock/etf/page.tsx` (티커/코드 직접입력 → range 3-상태 조회 → 기존 2패널 재사용)
+- [x] `components/stock/StockParams.tsx` `rangeStatus`·`onRetryRange` 필수 prop + 실패 UI([다시 시도])
+- [x] `app/stock/[id]/page.tsx` range 3-상태 동일 적용 (무한 "조회 중…" 멈춤 근본 수정)
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬)
+
+### Step 3 — 인프라 (요청 ②, 사용자) ✅
+- [x] Python Railway 배포 → `https://meridian-production-e345.up.railway.app`
+- [x] Vercel `PYTHON_SERVER_URL` 설정 → Redeploy
+- [x] `/api/stocks/schd/range` 정상 응답 확인
+- [ ] `/stock/etf` SCHD 입력 → 백테스트 전체 흐름 브라우저 확인
+
+### Step 4 — 문서 ✅
+- [x] PROGRESS.md / MASTER.md 갱신
 
 ---
 
@@ -165,3 +192,8 @@
 | 2026-06-25 | Phase 4-Step2 | TypeScript 타입 + Next.js API Route 4개 (types/backtest.ts, api/stocks, api/stocks/[id]/range, api/backtest) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 4-Step3 | 종목 목록 화면 (FE-03: StockCard.tsx, app/stock/page.tsx) | Claude Sonnet 4.6 |
 | 2026-06-26 | Phase 4-Step4 | 시뮬레이션 실행 화면 (FE-04: StockParams.tsx, StockResult.tsx, app/stock/[id]/page.tsx, recharts) | Claude Sonnet 4.6 |
+| 2026-06-26 | 버그수정 | `/stock` 서버 self-fetch 500 수정 (커밋 4830f81) | Claude |
+| 2026-06-26 | Phase 4.5-Step3 | 인프라: Python Railway 배포 + Vercel PYTHON_SERVER_URL 설정 + Redeploy | 사용자 |
+| 2026-06-26 | Phase 4.5-Step1 | ETF 그리드 재설계 (tiles.ts, SimTile.tsx, stock/page.tsx) 커밋 f7255f8 | Claude Opus 4.8 |
+| 2026-06-26 | Phase 4.5-Step2 | ETF 직접입력 + range 3-상태 (etf/page.tsx, StockParams.tsx, [id]/page.tsx) 커밋 38c83cf | Claude Opus 4.8 |
+| 2026-06-26 | Phase 4.5-Step4 | PROGRESS.md / MASTER.md 갱신 | Claude Opus 4.8 |
