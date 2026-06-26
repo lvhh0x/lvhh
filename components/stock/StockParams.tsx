@@ -5,9 +5,14 @@
 import { useState, useEffect } from 'react';
 import type { StockConfig, BacktestRequest, StockRange } from '@/types/backtest';
 
+// range 조회 3-상태 — 이 컴포넌트를 쓰는 모든 라우트가 동일 계약을 따른다.
+export type RangeStatus = 'loading' | 'ok' | 'error';
+
 interface Props {
   stock: StockConfig;
   dataRange: StockRange | null;
+  rangeStatus: RangeStatus;
+  onRetryRange: () => void;
   onSubmit: (req: BacktestRequest) => void;
   isLoading: boolean;
 }
@@ -60,7 +65,7 @@ function SectionTitle({ children }: { children: string }) {
   );
 }
 
-export default function StockParams({ stock, dataRange, onSubmit, isLoading }: Props) {
+export default function StockParams({ stock, dataRange, rangeStatus, onRetryRange, onSubmit, isLoading }: Props) {
   const [startYm, setStartYm] = useState('');
   const [endYm, setEndYm] = useState('');
   const [lumpSum, setLumpSum] = useState('');
@@ -128,7 +133,7 @@ export default function StockParams({ stock, dataRange, onSubmit, isLoading }: P
         >
           {stock.currency} · {stock.category.join(' · ')}
         </div>
-        {dataRange ? (
+        {rangeStatus === 'ok' ? (
           <div
             style={{
               fontFamily: 'var(--font-manrope), sans-serif',
@@ -143,7 +148,7 @@ export default function StockParams({ stock, dataRange, onSubmit, isLoading }: P
           >
             데이터 가능 기간: {rangeMin} ~ {rangeMax}
           </div>
-        ) : (
+        ) : rangeStatus === 'loading' ? (
           <div
             style={{
               fontFamily: 'var(--font-manrope), sans-serif',
@@ -153,6 +158,56 @@ export default function StockParams({ stock, dataRange, onSubmit, isLoading }: P
             }}
           >
             데이터 기간 조회 중…
+          </div>
+        ) : (
+          <div
+            style={{
+              marginTop: '10px',
+              padding: '10px 12px',
+              background: 'rgba(201,168,106,0.05)',
+              border: '1px solid rgba(201,168,106,0.2)',
+              borderRadius: '2px',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--font-manrope), sans-serif',
+                fontSize: '11px',
+                color: C.text,
+                lineHeight: 1.5,
+              }}
+            >
+              데이터 기간을 불러오지 못했습니다 (서버 미응답).
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-manrope), sans-serif',
+                fontSize: '11px',
+                color: C.muted,
+                lineHeight: 1.5,
+                marginTop: '2px',
+              }}
+            >
+              기간을 직접 입력해 진행하거나 다시 시도하세요.
+            </div>
+            <button
+              type="button"
+              onClick={onRetryRange}
+              style={{
+                marginTop: '8px',
+                padding: '5px 12px',
+                background: 'transparent',
+                border: `1px solid ${C.gold}`,
+                borderRadius: '2px',
+                color: C.gold,
+                fontFamily: 'var(--font-manrope), sans-serif',
+                fontSize: '11px',
+                letterSpacing: '0.06em',
+                cursor: 'pointer',
+              }}
+            >
+              다시 시도
+            </button>
           </div>
         )}
       </div>

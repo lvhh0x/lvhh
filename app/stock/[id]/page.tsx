@@ -2,7 +2,7 @@
 
 // FE-04 — 주식 시뮬레이션 실행 화면 (Client Component)
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type {
   StockConfig,
   StockRange,
@@ -10,7 +10,7 @@ import type {
   BacktestResult,
 } from '@/types/backtest';
 import InnerHeader from '@/components/layout/InnerHeader';
-import StockParams from '@/components/stock/StockParams';
+import StockParams, { type RangeStatus } from '@/components/stock/StockParams';
 import StockResult from '@/components/stock/StockResult';
 
 interface PageProps {
@@ -74,6 +74,7 @@ export default function StockRunPage({ params }: PageProps) {
 
   const [stock, setStock] = useState<StockConfig | null>(null);
   const [dataRange, setDataRange] = useState<StockRange | null>(null);
+  const [rangeStatus, setRangeStatus] = useState<RangeStatus>('loading');
   const [result, setResult] = useState<BacktestResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,24 +92,27 @@ export default function StockRunPage({ params }: PageProps) {
     }
   }, [id]);
 
-  // 데이터 가능 기간 조회 (Python 서버)
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`/api/stocks/${id}/range`)
-      .then((res) => {
-        if (!res.ok) return null;
-        return res.json() as Promise<StockRange>;
-      })
-      .then((range) => {
-        if (!cancelled) setDataRange(range);
-      })
-      .catch(() => {
-        if (!cancelled) setDataRange(null);
-      });
-    return () => {
-      cancelled = true;
-    };
+  // 데이터 가능 기간 조회 (Python 서버) — 3-상태로 관리, retry 재호출 가능
+  const loadRange = useCallback(async () => {
+    setRangeStatus('loading');
+    setDataRange(null);
+    try {
+      const res = await fetch(`/api/stocks/${id}/range`);
+      if (!res.ok) {
+        setRangeStatus('error');
+        return;
+      }
+      const range = (await res.json()) as StockRange;
+      setDataRange(range);
+      setRangeStatus('ok');
+    } catch {
+      setRangeStatus('error');
+    }
   }, [id]);
+
+  useEffect(() => {
+    void loadRange();
+  }, [loadRange]);
 
   async function handleBacktest(req: BacktestRequest) {
     setIsLoading(true);
@@ -188,6 +192,8 @@ export default function StockRunPage({ params }: PageProps) {
               <StockParams
                 stock={stock}
                 dataRange={dataRange}
+                rangeStatus={rangeStatus}
+                onRetryRange={() => void loadRange()}
                 onSubmit={handleBacktest}
                 isLoading={isLoading}
               />
