@@ -1,6 +1,6 @@
 // FE-03 — 종목 목록 화면 (Server Component)
 import type { Metadata } from 'next';
-import type { StockConfig } from '@/types/backtest';
+import { STOCK_CONFIGS } from '@/lib/stock/configs';
 import InnerHeader from '@/components/layout/InnerHeader';
 import StockCard from '@/components/stock/StockCard';
 
@@ -8,15 +8,8 @@ export const metadata: Metadata = {
   title: 'Stock Simulation — MERIDIAN',
 };
 
-async function getStocks(): Promise<StockConfig[]> {
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
-  const res = await fetch(`${base}/api/stocks`, { cache: 'no-store' });
-  if (!res.ok) return [];
-  return res.json() as Promise<StockConfig[]>;
-}
-
 export default async function StockPage() {
-  const stocks = await getStocks();
+  const stocks = STOCK_CONFIGS;
 
   return (
     <>
