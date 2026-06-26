@@ -135,7 +135,7 @@
 - [x] Python Railway 배포 → `https://meridian-production-e345.up.railway.app`
 - [x] Vercel `PYTHON_SERVER_URL` 설정 → Redeploy
 - [x] `/api/stocks/schd/range` 정상 응답 확인
-- [ ] `/stock/etf` SCHD 입력 → 백테스트 전체 흐름 브라우저 확인
+- [x] `/stock/etf` SCHD 입력 → 백테스트 전체 흐름 브라우저 확인 (ok/error 분기 모두 검증)
 
 ### Step 4 — 문서 ✅
 - [x] PROGRESS.md / MASTER.md 갱신
