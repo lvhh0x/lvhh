@@ -84,7 +84,7 @@
 - [x] `python/requirements.txt`
 - [x] `python/Procfile`
 - [x] `python/config/config.ini.default`
-- [ ] 로쫬 검증: `cd python && uvicorn main:app` → `curl /health`
+- [ ] 로컬 검증: `cd python && uvicorn main:app` → `curl /health`
 - [x] Railway/Render 배포 → `https://meridian-production-e345.up.railway.app`
 
 ### Step 2 — TypeScript 타입 & Next.js API Route ✅
@@ -142,16 +142,44 @@
 
 ---
 
-## 🔲 Phase 5 — 회사 시뮬레이션
-- [ ] `lib/simulation/company.ts` (→ LIB-01)
-- [ ] `app/api/pallets/route.ts` (→ BE-02)
-- [ ] `app/api/products/route.ts` (→ BE-03)
-- [ ] `components/company/CompanyCard.tsx` (→ FE-05)
-- [ ] `app/company/page.tsx` (→ FE-05)
-- [ ] `components/company/CompanyParams.tsx` (→ FE-06)
-- [ ] `components/company/CompanyResult.tsx` (→ FE-06)
-- [ ] `app/company/[id]/page.tsx` (→ FE-06)
-- [ ] 회사 시뮬레이션 전체 흐름 확인
+## ✅ Phase 5 — 회사 시뮬레이션 Step 1 (박스·파렛트 적재)
+
+### Step 1-A — 데이터 & 타입 기반 ✅ — 커밋 `e8f5590`
+- [x] `types/company.ts` 새 타입으로 교체 (InnerBoxKind, PackedBox, CompanyResult 등)
+- [x] `lib/company/data.ts` 마스터 데이터 작성 (제품3·인박스3·아웃박스2·파렛트5)
+- [x] `lib/company/tiles.ts` 6타일 데이터 작성
+- [x] `npx tsc --noEmit` 통과
+
+### Step 1-B — 계산 엔진 4종 (백엔드) ✅ — 커밋 `891b163`
+- [x] `lib/company/innerbox.ts` (엔진① — 인박스 분해)
+- [x] `lib/company/outerbox.ts` (엔진② — 박스 조합 FFD)
+- [x] `lib/company/pallet.ts` (엔진③ — 파렛트 적재)
+- [x] `lib/company/weight.ts` (엔진④ — 무게 계산)
+- [x] `lib/company/simulate.ts` (통합 오케스트레이터)
+- [x] 검증 스크립트 10개 케이스 전부 통과 (verify.ts)
+- [x] `npx tsc --noEmit` 통과
+
+### Step 1-C — 목록 화면 ✅ — 커밋 `929474a`
+- [x] `components/company/CompanyTile.tsx`
+- [x] `app/company/page.tsx` (6타일 그리드, 헤더 02/OPERATIONS SIMULATION)
+- [x] `npx tsc --noEmit` 통과
+
+### Step 1-D — 시각화(SVG) ✅ — 커밋 `abbaacd`
+- [x] `components/company/BoxSvg.tsx` (아이소메트릭 박스 그림)
+- [x] `components/company/CompanyPalletSvg.tsx` (파렛트 적재 형상)
+- [x] `npx tsc --noEmit` 통과
+
+### Step 1-E — 실행 화면 ✅ — 커밋 `c2fb0d4`
+- [x] `components/company/CompanyParams.tsx` (입력 패널, 제품 추가)
+- [x] `components/company/CompanyResult.tsx` (박스 그림+텍스트, 파렛트 그림+텍스트)
+- [x] `app/company/[id]/page.tsx` (2패널 통합)
+- [x] `npx tsc --noEmit` 통과
+
+### Step 1-F — 검증 & 문서 ✅
+- [x] 로컬 클론 + `npm install` + `npx tsc --noEmit` 통과
+- [x] `npm run build` 통과 (폰트 스텁 로컬)
+- [x] 검증 로그 마크다운 문서 작성
+- [x] `docs/PROGRESS.md` / `docs/MASTER.md` Phase 5 Step 1 완료 처리
 
 ---
 
@@ -197,3 +225,9 @@
 | 2026-06-26 | Phase 4.5-Step1 | ETF 그리드 재설계 (tiles.ts, SimTile.tsx, stock/page.tsx) 커밋 f7255f8 | Claude Opus 4.8 |
 | 2026-06-26 | Phase 4.5-Step2 | ETF 직접입력 + range 3-상태 (etf/page.tsx, StockParams.tsx, [id]/page.tsx) 커밋 38c83cf | Claude Opus 4.8 |
 | 2026-06-26 | Phase 4.5-Step4 | PROGRESS.md / MASTER.md 갱신 | Claude Opus 4.8 |
+| 2026-06-27 | Phase 5-Step1-A | 타입 교체 + 마스터 데이터 + 타일 (커밋 e8f5590) | Claude Sonnet 4.6 |
+| 2026-06-27 | Phase 5-Step1-B | 계산 엔진 5종 (innerbox/outerbox/pallet/weight/simulate) 커밋 891b163 | Claude Sonnet 4.6 |
+| 2026-06-27 | Phase 5-Step1-C | 목록 화면 (CompanyTile + /company 6타일) 커밋 929474a | Claude Sonnet 4.6 |
+| 2026-06-27 | Phase 5-Step1-D | SVG 시각화 (BoxSvg + CompanyPalletSvg) 커밋 abbaacd | Claude Sonnet 4.6 |
+| 2026-06-27 | Phase 5-Step1-E | 실행 화면 (CompanyParams + CompanyResult + /company/[id]) 커밋 c2fb0d4 | Claude Sonnet 4.6 |
+| 2026-06-27 | Phase 5-Step1-F | 검증 로그 + 문서 갱신 | Claude Sonnet 4.6 |
