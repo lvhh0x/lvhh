@@ -132,7 +132,7 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
             color: '#DCC08A',
           }}
         >
-          쳙 무게 {result.totalWeight.toFixed(2)} kg
+          총 무게 {result.totalWeight.toFixed(2)} kg
         </div>
         {result.weightIncomplete && (
           <div
@@ -171,7 +171,7 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
               lineHeight: 1.8,
             }}
           >
-            <div>쳙 파렛트: {pallet.totalPallets}개</div>
+            <div>총 파렛트: {pallet.totalPallets}개</div>
             <div>마지막 파렛트: {pallet.layers}층 (마지막 층 {pallet.lastLayerBoxes}개, 층당 {pallet.boxesPerLayer})</div>
             {palletSpec && (
               <div style={{ color: '#9C9486' }}>
