@@ -74,9 +74,8 @@ export function simulate(params: CompanyParams): SimulateOutcome {
   if (params.palletId) {
     const palletSpec = findPallet(params.palletId);
     if (palletSpec) {
-      const stackWeight = boxes
-        .filter(b => b.kind === 'outer')
-        .reduce((acc, b) => acc + b.weight, 0);
+      // 파렛트 위에 올려진 모든 것의 무게 = 제품 + 인박스 + 아웃박스 tare 전체
+      const stackWeight = productWeight + innerTare + outerTare;
       pallet = calcPallet(outerCount, palletSpec, stackWeight);
       if (pallet) palletTare = palletSpec.tare * pallet.totalPallets;
     }
