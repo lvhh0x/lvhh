@@ -1,177 +1,242 @@
-// 엔진② — 박스 조합 (Phase 5 Step 1)
-// 인박스 합산 → 아웃박스(cap=60) / 택배박스(cap=12) / 낱개 로 묶는다.
+// 엔진② — 박스 조합 (Phase 5 Step 2 재작성)
+// 입력: 제품별 SizedInnerCount[][] (사이즈 정보 보존)
 //
-// 규칙 (계획서 3.4):
-//   1) 큰 인박스부터 FFD로 아웃박스(cap=60)에 패킹 → 꽉 찬 아웃박스 + 마지막 부분 박스
-//   2) 마지막 부분 박스(<60)의 인박스를 "잔여"로 꺼낸다.
-//   3) 잔여 인박스 수:
-//        0개 → 끝
-//        1개 → 낱개 1개
-//        2개+ → 택배박스 1개에 cap=12로 담기면 택배, 안 담기면 아웃박스(부분)
-//   4) 잔여가 택배 1개 초과 시: "택배 우선 → 안 되면 아웃박스" 그리디 반복.
+// 알고리즘 (계획서 §4):
+//   ① 제품별 풀 아웃박스(60단위) 추출 → 사이즈별 잔여 수집
+//   ② 잔여 풀 FFD(60단위) → 모든 bin==60이면 합침, 하나라도 <60이면 분리
+//   ③ 분리 시: 같은 사이즈끄리 묶어 낙개/택배(cap=12)/아웃박스(cap=60) 처리
 
 import type {
-  InnerBoxCount,
+  SizedInnerCount,
   InnerBoxKind,
   OuterBoxKind,
   PackedBox,
 } from '@/types/company';
 import { INNER_UNITS } from './data';
 
-const KINDS: InnerBoxKind[] = [145, 95, 60];
 const OUTER_CAP = 60;
 const COURIER_CAP = 12;
 
-// 인박스 합산을 큰 순서의 단일 인박스 배열로 펼친다.
-function expand(totals: InnerBoxCount[]): InnerBoxKind[] {
-  const flat: InnerBoxKind[] = [];
-  for (const k of KINDS) {
-    const found = totals.find(t => t.kind === k);
-    if (found) {
-      for (let i = 0; i < found.count; i++) flat.push(k);
+// ─── 내부 헬퍼 타입 ────────────────────────────────────────────────────────
+
+/** 인박스 1개 단위 (전개 후 FFD에 사용) */
+type FlatInner = {
+  size: number;
+  meter: number;
+  kind: InnerBoxKind;
+  productQtyPerBox: number; // 이 인박스 1개에 담긴 제품 수
+};
+
+// ─── 전개 / 압축 ────────────────────────────────────────────────────────────────
+
+/** SizedInnerCount[] → FlatInner[] (kind 내림차순 정렬) */
+function expandSized(items: SizedInnerCount[]): FlatInner[] {
+  const flat: FlatInner[] = [];
+  for (const item of items) {
+    const productQtyPerBox = item.count > 0 ? item.productQty / item.count : 0;
+    for (let i = 0; i < item.count; i++) {
+      flat.push({ size: item.size, meter: item.meter, kind: item.kind, productQtyPerBox });
     }
   }
+  flat.sort((a, b) => b.kind - a.kind); // 145 → 95 → 60
   return flat;
 }
 
-function unit(kind: InnerBoxKind, box: OuterBoxKind): number {
-  return INNER_UNITS[kind][box];
+/** FlatInner[] → SizedInnerCount[] (size/meter/kind 같은 것렜리 합산) */
+function compressSized(items: FlatInner[]): SizedInnerCount[] {
+  type Entry = FlatInner & { count: number };
+  const map = new Map<string, Entry>();
+  for (const item of items) {
+    const key = `${item.size}_${item.meter}_${item.kind}`;
+    const existing = map.get(key);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      map.set(key, { ...item, count: 1 });
+    }
+  }
+  return [...map.values()]
+    .sort((a, b) => b.kind - a.kind)
+    .map(v => ({
+      size: v.size,
+      meter: v.meter,
+      kind: v.kind,
+      count: v.count,
+      productQty: v.count * v.productQtyPerBox,
+    }));
 }
 
-// 인박스 묶음을 InnerBoxCount[]로 압축
-function compress(items: InnerBoxKind[]): InnerBoxCount[] {
-  const map = new Map<InnerBoxKind, number>();
-  for (const k of items) map.set(k, (map.get(k) ?? 0) + 1);
-  return KINDS
-    .filter(k => (map.get(k) ?? 0) > 0)
-    .map(k => ({ kind: k, count: map.get(k)! }));
-}
+// ─── 단계①: 제품별 풀 아웃박스 추출 + 잔여 분리 ─────────────────────
 
-// 주어진 인박스 묶음이 특정 박스 cap 안에 전부 들어가는지
-function fitsInBox(items: InnerBoxKind[], box: OuterBoxKind, cap: number): boolean {
-  const sum = items.reduce((acc, k) => acc + unit(k, box), 0);
-  return sum <= cap;
-}
+function extractFullAndRemainder(
+  productItems: SizedInnerCount[],
+): { fullBoxes: PackedBox[]; remainder: FlatInner[] } {
+  const flat = expandSized(productItems);
+  if (flat.length === 0) return { fullBoxes: [], remainder: [] };
 
-/**
- * 인박스 합산 → PackedBox[] (아웃박스 / 택배 / 낱개)
- */
-export function packIntoBoxes(totals: InnerBoxCount[]): PackedBox[] {
-  const flat = expand(totals);
-  if (flat.length === 0) return [];
-
-  const result: PackedBox[] = [];
-
-  // ── 1) 아웃박스 FFD 패킹 (cap=60) ──
-  // bins: 각 bin은 인박스 배열. 큰 인박스부터 처리.
-  const bins: InnerBoxKind[][] = [];
+  const bins: FlatInner[][] = [];
   const binSums: number[] = [];
 
-  for (const k of flat) {
-    const u = unit(k, 'outer');
+  for (const item of flat) {
+    const u = INNER_UNITS[item.kind]['outer'];
     let placed = false;
     for (let i = 0; i < bins.length; i++) {
       if (binSums[i] + u <= OUTER_CAP) {
-        bins[i].push(k);
+        bins[i].push(item);
         binSums[i] += u;
         placed = true;
         break;
       }
     }
     if (!placed) {
-      bins.push([k]);
+      bins.push([item]);
       binSums.push(u);
     }
   }
 
-  // ── 2) 꽉 찬 bin = 아웃박스 확정, 부분 bin = 잔여 ──
-  const leftover: InnerBoxKind[] = [];
+  const fullBoxes: PackedBox[] = [];
+  const remainder: FlatInner[] = [];
+
   for (let i = 0; i < bins.length; i++) {
     if (binSums[i] === OUTER_CAP) {
-      result.push({
+      fullBoxes.push({
         kind: 'outer',
-        contents: compress(bins[i]),
+        contents: compressSized(bins[i]),
         filled: true,
-        weight: 0, // weight.ts에서 채움
+        weight: 0,
       });
     } else {
-      // 부분 bin → 잔여로
-      for (const k of bins[i]) leftover.push(k);
+      for (const item of bins[i]) remainder.push(item);
     }
   }
 
-  // ── 3~4) 잔여 처리: 택배 우선 → 안 되면 아웃박스, 그리디 반복 ──
-  // 잔여를 큰 인박스부터 정렬
-  leftover.sort((a, b) => b - a);
+  return { fullBoxes, remainder };
+}
 
-  let rem = [...leftover];
+// ─── 단계③-분리: 같은 사이즈 잔여 → 낙개/택배/아웃박스 ───────────────
+
+function packRemainderBySizeGroup(items: FlatInner[]): PackedBox[] {
+  const result: PackedBox[] = [];
+  let rem = [...items].sort((a, b) => b.kind - a.kind);
+
   while (rem.length > 0) {
     if (rem.length === 1) {
-      // 낱개 1개
-      result.push({
-        kind: 'loose',
-        contents: compress(rem),
-        filled: false,
-        weight: 0,
-      });
-      rem = [];
+      // 인박스 1개 → 낙개
+      result.push({ kind: 'loose', contents: compressSized(rem), filled: false, weight: 0 });
       break;
     }
 
-    // 택배박스에 FFD로 최대한 담기 (cap=12)
-    const courierItems: InnerBoxKind[] = [];
+    // 택배박스(cap=12) 시도
+    const courierItems: FlatInner[] = [];
     let courierSum = 0;
-    const stillLeft: InnerBoxKind[] = [];
-    for (const k of rem) {
-      const u = unit(k, 'courier');
+    const stillLeft: FlatInner[] = [];
+
+    for (const item of rem) {
+      const u = INNER_UNITS[item.kind]['courier'];
       if (courierSum + u <= COURIER_CAP) {
-        courierItems.push(k);
+        courierItems.push(item);
         courierSum += u;
       } else {
-        stillLeft.push(k);
+        stillLeft.push(item);
       }
     }
 
     if (stillLeft.length === 0) {
-      // 잔여 전부가 택배 1개에 담김
-      if (courierItems.length === 1) {
-        // 단일 → 낱개
-        result.push({
-          kind: 'loose',
-          contents: compress(courierItems),
-          filled: false,
-          weight: 0,
-        });
-      } else {
-        result.push({
-          kind: 'courier',
-          contents: compress(courierItems),
-          filled: false,
-          weight: 0,
-        });
-      }
-      rem = [];
+      // 전부 택배 1개에 담김
+      const boxKind: OuterBoxKind | 'loose' = courierItems.length === 1 ? 'loose' : 'courier';
+      result.push({ kind: boxKind, contents: compressSized(courierItems), filled: false, weight: 0 });
+      break;
     } else {
-      // 택배 1개로 안 되는 잔여 → 아웃박스(부분) 1개에 cap=60로 담기
-      const outerItems: InnerBoxKind[] = [];
+      // 택배 초과 → 아웃박스(cap=60) 그리디 1개
+      const outerItems: FlatInner[] = [];
       let outerSum = 0;
-      const overflow: InnerBoxKind[] = [];
-      for (const k of rem) {
-        const u = unit(k, 'outer');
+      const overflow: FlatInner[] = [];
+
+      for (const item of rem) {
+        const u = INNER_UNITS[item.kind]['outer'];
         if (outerSum + u <= OUTER_CAP) {
-          outerItems.push(k);
+          outerItems.push(item);
           outerSum += u;
         } else {
-          overflow.push(k);
+          overflow.push(item);
         }
       }
+
+      result.push({ kind: 'outer', contents: compressSized(outerItems), filled: false, weight: 0 });
+      rem = overflow;
+    }
+  }
+
+  return result;
+}
+
+// ─── 메인 함수 ─────────────────────────────────────────────────────────────
+
+/**
+ * 제품별 인박스 분해 결과 → PackedBox[]
+ * @param perProduct simulate.ts 에서 전달하는 SizedInnerCount[][]
+ */
+export function packIntoBoxes(perProduct: SizedInnerCount[][]): PackedBox[] {
+  const result: PackedBox[] = [];
+  const allRemainders: FlatInner[] = [];
+
+  // ① 제품별 풀 아웃박스 추출 + 잔여 수집
+  for (const productItems of perProduct) {
+    const { fullBoxes, remainder } = extractFullAndRemainder(productItems);
+    result.push(...fullBoxes);
+    allRemainders.push(...remainder);
+  }
+
+  if (allRemainders.length === 0) return result;
+
+  // ② 잔여 풀 FFD (60단위) → 빈칸 판정
+  const sortedRem = [...allRemainders].sort((a, b) => b.kind - a.kind);
+  const remBins: FlatInner[][] = [];
+  const remBinSums: number[] = [];
+
+  for (const item of sortedRem) {
+    const u = INNER_UNITS[item.kind]['outer'];
+    let placed = false;
+    for (let i = 0; i < remBins.length; i++) {
+      if (remBinSums[i] + u <= OUTER_CAP) {
+        remBins[i].push(item);
+        remBinSums[i] += u;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      remBins.push([item]);
+      remBinSums.push(u);
+    }
+  }
+
+  const allFull = remBinSums.every(s => s === OUTER_CAP);
+
+  if (allFull) {
+    // 합침: 섬인 아웃박스로 확정 (filled=true)
+    for (const bin of remBins) {
       result.push({
         kind: 'outer',
-        contents: compress(outerItems),
-        filled: false,
+        contents: compressSized(bin),
+        filled: true,
         weight: 0,
       });
-      rem = overflow;
+    }
+  } else {
+    // 분리: 사이즈별로 묶어 처리
+    const sizeGroups = new Map<string, FlatInner[]>();
+    for (const item of allRemainders) {
+      const key = `${item.size}_${item.meter}`;
+      const group = sizeGroups.get(key);
+      if (group) {
+        group.push(item);
+      } else {
+        sizeGroups.set(key, [item]);
+      }
+    }
+    for (const items of sizeGroups.values()) {
+      result.push(...packRemainderBySizeGroup(items));
     }
   }
 
@@ -196,6 +261,3 @@ export function countOuterBoxes(boxes: PackedBox[]): {
   }
   return { outerCount, courierCount, looseCount };
 }
-
-// 외부에서 쓰는 헬퍼 (검증/표시용)
-export { fitsInBox };
