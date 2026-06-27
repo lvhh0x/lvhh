@@ -1,5 +1,8 @@
-// 박스·파렛트 적재 시뮬레이션 타입 (Phase 5 Step 1)
-// 구 placeholder는 이 파일로 교체됨 — import 영향 없음 확인 후 적용.
+// 박스·파렛트 적재 시뮬레이션 타입 (Phase 5 Step 2 — 사이즈 정보 보존)
+// Phase 5 Step 1 대비 변경:
+//   · SizedInnerCount 추가 (사이즈+미터+인박스종류+수량+제품수량)
+//   · PackedBox.contents: InnerBoxCount[] → SizedInnerCount[] (사이즈 정보 박스까지 전달)
+//   · InnerBoxCount 는 innerTotals 표시용으로 유지
 
 // ─── 인박스 / 아웃박스 종류 ───────────────────────────────────────────────────
 
@@ -60,16 +63,29 @@ export interface CompanyParams {
 
 // ─── 중간 결과 ─────────────────────────────────────────────────────────────────
 
+/** 종류별 인박스 합산 (innerTotals 표시용 — 사이즈 정보 없음) */
 export interface InnerBoxCount {
   kind: InnerBoxKind;
   count: number;
 }
 
+/**
+ * 사이즈가 붙은 인박스 카운트 (Phase 5 Step 2 신규)
+ * 제품→박스까지 사이즈/미터 정보를 유지한다.
+ */
+export interface SizedInnerCount {
+  size: number;        // 제품 사이즈 (mm): 40 | 60 | 110
+  meter: number;       // 제품 미터 (m): 300
+  kind: InnerBoxKind;  // 인박스 종류: 145 | 95 | 60
+  count: number;       // 이 사이즈+종류 인박스 개수
+  productQty: number;  // 이 인박스들에 담긴 제품 개수 (= count × innerCapacity[kind])
+}
+
 export interface PackedBox {
-  kind: OuterBoxKind | 'loose'; // 아웃박스 / 택배박스 / 낱개
-  contents: InnerBoxCount[];
-  filled: boolean;              // 꽉 찬 아웃박스 여부
-  weight: number;               // 박스 tare + 내용물 인박스 tare + 비례 제품 무게
+  kind: OuterBoxKind | 'loose';  // 아웃박스 / 택배박스 / 낱개
+  contents: SizedInnerCount[];   // ← 사이즈 정보 포함 (사이즈 3~4종 혼재 가능)
+  filled: boolean;               // 꽉 찬 아웃박스(60단위) 여부
+  weight: number;                // 박스 tare + 내용물 인박스 tare
 }
 
 // ─── 파렛트 결과 ───────────────────────────────────────────────────────────────
@@ -87,7 +103,7 @@ export interface PalletStack {
 // ─── 최종 결과 ─────────────────────────────────────────────────────────────────
 
 export interface CompanyResult {
-  innerTotals: InnerBoxCount[];   // 인박스 종류별 총합
+  innerTotals: InnerBoxCount[];   // 인박스 종류별 총합 (표시용)
   boxes: PackedBox[];             // 아웃박스 / 택배 / 낱개 목록
   outerCount: number;             // 아웃박스 수
   courierCount: number;           // 택배박스 수
