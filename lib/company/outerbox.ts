@@ -3,8 +3,8 @@
 //
 // 알고리즘 (계획서 §4):
 //   ① 제품별 풀 아웃박스(60단위) 추출 → 사이즈별 잔여 수집
-//   ② 잔여 풀 FFD(60단위) → 모든 bin==60이면 합침, 하나라도 <60이면 분리
-//   ③ 분리 시: 같은 사이즈끄리 묶어 낙개/택배(cap=12)/아웃박스(cap=60) 처리
+//   ② 잔여 풀 FFD(60단위) → 모든 bin==60이면 합치, 하나라도 <60이면 분리
+//   ③ 분리 시: 같은 사이즈끼리 묶어 낙개/택배(cap=12)/아웃박스(cap=60) 처리
 
 import type {
   SizedInnerCount,
@@ -42,7 +42,7 @@ function expandSized(items: SizedInnerCount[]): FlatInner[] {
   return flat;
 }
 
-/** FlatInner[] → SizedInnerCount[] (size/meter/kind 같은 것렜리 합산) */
+/** FlatInner[] → SizedInnerCount[] (size/meter/kind 같은 것끼리 합산) */
 function compressSized(items: FlatInner[]): SizedInnerCount[] {
   type Entry = FlatInner & { count: number };
   const map = new Map<string, Entry>();
@@ -55,7 +55,7 @@ function compressSized(items: FlatInner[]): SizedInnerCount[] {
       map.set(key, { ...item, count: 1 });
     }
   }
-  return [...map.values()]
+  return Array.from(map.values())
     .sort((a, b) => b.kind - a.kind)
     .map(v => ({
       size: v.size,
@@ -214,7 +214,7 @@ export function packIntoBoxes(perProduct: SizedInnerCount[][]): PackedBox[] {
   const allFull = remBinSums.every(s => s === OUTER_CAP);
 
   if (allFull) {
-    // 합침: 섬인 아웃박스로 확정 (filled=true)
+    // 합치: 섬인 아웃박스로 확정 (filled=true)
     for (const bin of remBins) {
       result.push({
         kind: 'outer',
@@ -235,7 +235,7 @@ export function packIntoBoxes(perProduct: SizedInnerCount[][]): PackedBox[] {
         sizeGroups.set(key, [item]);
       }
     }
-    for (const items of sizeGroups.values()) {
+    for (const items of Array.from(sizeGroups.values())) {
       result.push(...packRemainderBySizeGroup(items));
     }
   }
