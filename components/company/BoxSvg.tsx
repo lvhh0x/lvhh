@@ -39,7 +39,7 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
   // \ubc15\uc2a4 \uc544\uc774\uc18c\uba54\ud2b8\ub9ad \uc88c\ud45c (bh\ub9cc \uc885\ub958\ubcc4 \ucd95\uc18c)
   const depth = w * 0.22;
   const bx    = w * 0.16;
-  const by    = w * 0.26;
+  const by    = w * 0.36;  // 0.26 \u2192 0.36: \uc704 \uc5ec\ubc31 \ud655\ubcf4
   const bw    = w * 0.56;
   const bh    = w * 0.50 * heightMult(kind);
 
@@ -48,7 +48,7 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
   const contentFontSize = Math.round(w * 0.100);
   const lineH           = contentFontSize + 5;
   const boxBottom       = by + bh;
-  const labelY          = Math.round(boxBottom + w * 0.10);
+  const labelY          = Math.round(boxBottom + w * 0.17);
   const firstContentY   = labelY + lineH + 2;
   const totalH          = firstContentY + contents.length * lineH + 6;
 
@@ -118,10 +118,9 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
           x={w / 2}
           y={firstContentY + i * lineH}
           textAnchor="middle"
-          fontFamily="var(--font-jetbrains-mono), monospace"
+          fontFamily="var(--font-manrope), sans-serif"
           fontSize={contentFontSize}
           fill="#9C9486"
-          style={{ fontFeatureSettings: "'zero' 0" }}
         >
           {contentLine(c)}
         </text>

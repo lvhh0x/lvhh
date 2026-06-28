@@ -1,7 +1,7 @@
 'use client';
 
-// 회사 시뮬레이션 결과 패널 (Client Component) — Phase 5 Step 1
-// [1] 박스 결과 (그림 + 텍스트) → [2] 파렛트 결과 (선택 시).
+// \ud68c\uc0ac \uc2dc\ubbac\ub808\uc774\uc158 \uacb0\uacfc \ud328\ub110 (Client Component) \u2014 Phase 5 Step 1
+// [1] \ubc15\uc2a4 \uacb0\uacfc (\uadf8\ub9bc + \ud14d\uc2a4\ud2b8) \u2192 [2] \ud30c\ub81b\ud2b8 \uacb0\uacfc (\uc120\ud0dd \uc2dc).
 
 import type { CompanyResult, InnerBoxCount } from '@/types/company';
 import BoxSvg from './BoxSvg';
@@ -15,8 +15,8 @@ interface Props {
 }
 
 function innerText(list: InnerBoxCount[]): string {
-  if (list.length === 0) return '없음';
-  return list.map(i => `${i.kind}인박스 ×${i.count}`).join(', ');
+  if (list.length === 0) return '\uc5c6\uc74c';
+  return list.map(i => `${i.kind}\uc778\ubc15\uc2a4 \u00d7${i.count}`).join(', ');
 }
 
 const sectionLabel: React.CSSProperties = {
@@ -40,7 +40,7 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
     return (
       <div style={{ ...card, textAlign: 'center', color: '#9C9486' }}>
         <span style={{ fontFamily: 'var(--font-manrope), sans-serif', fontSize: '13px' }}>
-          계산 중…
+          \uacc4\uc0b0 \uc911\u2026
         </span>
       </div>
     );
@@ -51,10 +51,10 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
       <div style={{ ...card, color: '#C98A6A' }}>
         <div style={sectionLabel}>UNSUPPORTED</div>
         <p style={{ fontFamily: 'var(--font-manrope), sans-serif', fontSize: '13px', margin: 0, lineHeight: 1.6 }}>
-          지원하지 않는 제품입니다:{' '}
-          {unsupported.map(u => `${u.size}×${u.meter}`).join(', ')}
+          \uc9c0\uc6d0\ud558\uc9c0 \uc54a\ub294 \uc81c\ud488\uc785\ub2c8\ub2e4:{' '}
+          {unsupported.map(u => `${u.size}\u00d7${u.meter}`).join(', ')}
           <br />
-          (현재 지원: 40×300, 60×300, 110×300)
+          (\ud604\uc7ac \uc9c0\uc6d0: 40\u00d7300, 60\u00d7300, 110\u00d7300)
         </p>
       </div>
     );
@@ -64,7 +64,7 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
     return (
       <div style={{ ...card, textAlign: 'center', color: '#9C9486' }}>
         <span style={{ fontFamily: 'var(--font-manrope), sans-serif', fontSize: '13px' }}>
-          제품을 입력하고 실행하세요.
+          \uc81c\ud488\uc744 \uc785\ub825\ud558\uace0 \uc2e4\ud589\ud558\uc138\uc694.
         </span>
       </div>
     );
@@ -75,11 +75,11 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
 
   return (
     <div>
-      {/* [1] 박스 결과 */}
+      {/* [1] \ubc15\uc2a4 \uacb0\uacfc */}
       <div style={card}>
-        <div style={sectionLabel}>[1] 박스 결과</div>
+        <div style={sectionLabel}>[1] \ubc15\uc2a4 \uacb0\uacfc</div>
 
-        {/* 인박스 합산 */}
+        {/* \uc778\ubc15\uc2a4 \ud569\uc0b0 */}
         <div
           style={{
             fontFamily: 'var(--font-manrope), sans-serif',
@@ -88,10 +88,10 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
             marginBottom: '6px',
           }}
         >
-          인박스 합산: {innerText(result.innerTotals)}
+          \uc778\ubc15\uc2a4 \ud569\uc0b0: {innerText(result.innerTotals)}
         </div>
 
-        {/* 집계 */}
+        {/* \uc9d1\uacc4 */}
         <div
           style={{
             fontFamily: 'var(--font-jetbrains-mono), monospace',
@@ -100,16 +100,17 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
             marginBottom: '18px',
           }}
         >
-          아웃박스 {result.outerCount} · 택배박스 {result.courierCount} · 낱개 {result.looseCount}
+          \uc544\uc6c3\ubc15\uc2a4 {result.outerCount} \u00b7 \ud0dd\ubc30\ubc15\uc2a4 {result.courierCount} \u00b7 \ub099\uac1c {result.looseCount}
         </div>
 
-        {/* 박스 그림들 */}
+        {/* \ubc15\uc2a4 \uadf8\ub9bc\ub4e4 */}
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
             gap: '12px',
             marginBottom: '18px',
+            alignItems: 'flex-end',
           }}
         >
           {result.boxes.map((box, i) => (
@@ -124,7 +125,7 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
           ))}
         </div>
 
-        {/* 무게 */}
+        {/* \ubb34\uac8c */}
         <div
           style={{
             fontFamily: 'var(--font-jetbrains-mono), monospace',
@@ -132,7 +133,7 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
             color: '#DCC08A',
           }}
         >
-          총 무게 {result.totalWeight.toFixed(2)} kg
+          \uc7d1 \ubb34\uac8c {result.totalWeight.toFixed(2)} kg
         </div>
         {result.weightIncomplete && (
           <div
@@ -143,15 +144,15 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
               marginTop: '4px',
             }}
           >
-            ※ 60인박스·택배박스 무게 미반영 (일부 무게 과소 표시)
+            \u00d7 60\uc778\ubc15\uc2a4\u00b7\ud0dd\ubc30\ubc15\uc2a4 \ubb34\uac8c \ubbf8\ubc18\uc601 (\uc77c\ubd80 \ubb34\uac8c \uacfc\uc18c \ud45c\uc2dc)
           </div>
         )}
       </div>
 
-      {/* [2] 파렛트 결과 */}
+      {/* [2] \ud30c\ub81b\ud2b8 \uacb0\uacfc */}
       {pallet && (
         <div style={card}>
-          <div style={sectionLabel}>[2] 파렛트 적재</div>
+          <div style={sectionLabel}>[2] \ud30c\ub81b\ud2b8 \uc801\uc7ac</div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
             <CompanyPalletSvg
@@ -162,7 +163,7 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
             />
           </div>
 
-          {/* 파렛트 텍스트 정보 */}
+          {/* \ud30c\ub81b\ud2b8 \ud14d\uc2a4\ud2b8 \uc815\ubcf4 */}
           <div
             style={{
               fontFamily: 'var(--font-jetbrains-mono), monospace',
@@ -171,15 +172,15 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
               lineHeight: 1.8,
             }}
           >
-            <div>총 파렛트: {pallet.totalPallets}개</div>
-            <div>마지막 파렛트: {pallet.layers}층 (마지막 층 {pallet.lastLayerBoxes}개, 층당 {pallet.boxesPerLayer})</div>
+            <div>\uc7d1 \ud30c\ub81b\ud2b8: {pallet.totalPallets}\uac1c</div>
+            <div>\ub9c8\uc9c0\ub9c9 \ud30c\ub81b\ud2b8: {pallet.layers}\uce35 (\ub9c8\uc9c0\ub9c9 \uce35 {pallet.lastLayerBoxes}\uac1c, \uce35\ub2f9 {pallet.boxesPerLayer})</div>
             {palletSpec && (
               <div style={{ color: '#9C9486' }}>
-                규격: {palletSpec.w}×{palletSpec.d}mm · 높이 {pallet.height}mm
+                \uaddc\uaca9: {palletSpec.w}\u00d7{palletSpec.d}mm \u00b7 \ub192\uc774 {pallet.height}mm
               </div>
             )}
             <div style={{ color: '#DCC08A' }}>
-              적재 무게: {pallet.weight.toFixed(2)} kg
+              \uc801\uc7ac \ubb34\uac8c: {pallet.weight.toFixed(2)} kg
             </div>
           </div>
         </div>
