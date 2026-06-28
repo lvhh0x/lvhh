@@ -16,7 +16,7 @@ function visual(kind: BoxVisualKind): { label: string; face: string; top: string
   switch (kind) {
     case 'outer':   return { label: '\uc544\uc6c3\ubc15\uc2a4',    face: '#C9A86A', top: '#DCC08A', side: '#A8884E' };
     case 'courier': return { label: '\ud0dd\ubc30\ubc15\uc2a4',    face: '#8FBFA0', top: '#A8D4B8', side: '#6E9A80' };
-    case 'loose':   return { label: '\ub099\uac1c(\uc778\ubc15\uc2a4)', face: '#9C9486', top: '#B6AEA0', side: '#7A7264' };
+    case 'loose':   return { label: '\ub0b1\uac1c(\uc778\ubc15\uc2a4)', face: '#9C9486', top: '#B6AEA0', side: '#7A7264' };
   }
 }
 
@@ -118,9 +118,9 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
           x={w / 2}
           y={firstContentY + i * lineH}
           textAnchor="middle"
-          fontFamily="var(--font-manrope), sans-serif"
           fontSize={contentFontSize}
           fill="#9C9486"
+          style={{ fontFamily: 'system-ui, sans-serif' }}
         >
           {contentLine(c)}
         </text>
