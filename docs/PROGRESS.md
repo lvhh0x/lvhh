@@ -183,6 +183,40 @@
 
 ---
 
+## ✅ Phase 5 Step 2 — 박스 조합 로직 개선 (SizedInnerCount + 단위표 JSON 분리)
+
+### Step 2-0 — 백업 ✅ — 커밋 `ebece39`
+- [x] 9개 파일을 `lib/company/_backup/`에 복사
+
+### Step 2-1 — 타입 변경 ✅ — 커밋 `08461d7`, `c5c3539`
+- [x] `types/company.ts`에 `SizedInnerCount` 인터페이스 추가
+- [x] `PackedBox.contents` 타입 `InnerBoxCount[]` → `SizedInnerCount[]`
+- [x] `tsconfig.json`에 `_backup` exclude 추가
+
+### Step 2-2 — 엔진① 사이즈 부착 ✅ — 커밋 `21bd8e5`
+- [x] `lib/company/innerbox.ts` 반환 타입 `SizedInnerCount[]`로 (size/meter/productQty 부착)
+
+### Step 2-3 — 마스터 데이터 JSON 분리 ✅
+- [x] `lib/company/master.json` 생성 (`_rules` 설명 + products/innerBoxes/outerBoxes/pallets/innerUnits)
+- [x] `lib/company/data.ts` 재작성: JSON import → 타입 입혀 재노출 (export 시그니처 유지)
+
+### Step 2-4 — 엔진② `outerbox.ts` 재작성 ✅
+- [x] "같은 사이즈 먼저, 딱 떨어질 때만 합친다" 신 규칙 구현
+- [x] subset-sum 정확 합침 + finalize(택배/낱개) 방식
+- [x] `OUTER_CAP`/`COURIER_CAP` data(`capacityUnit`)에서 읽어 중앙화
+
+### Step 2-5 — BoxSvg / CompanyPalletSvg UI 연결 ✅
+- [x] `components/company/BoxSvg.tsx`: `SizedInnerCount` 기반 내용물 한 줄 표기 (`{size}×{meter}m {kind}×{count}({productQty}개)`)
+- [x] `components/company/CompanyPalletSvg.tsx`: 마지막 층 빈자리 점선 outline 시각화, 다중 파렛트 안내 텍스트
+
+### Step 2-6 — 검증 ✅ (18/18 통과)
+- [x] `scripts/test-step4.ts` 18개 케이스 (HANDOFF §4.4 예시 A/B/C + 3사이즈 혼합)
+- [x] `npx tsc --noEmit` 에러 0
+- [x] `npm run build` 통과 (폰트 스텁 로컬)
+- [x] `docs/PHASE5-STEP2-VERIFY-LOG.md` 생성
+
+---
+
 ## 🔲 Phase 6 — DB 연동
 - [ ] `pallet_types` 실제 데이터 확인
 - [ ] `/api/pallets` → Supabase 연결 검증
@@ -231,3 +265,4 @@
 | 2026-06-27 | Phase 5-Step1-D | SVG 시각화 (BoxSvg + CompanyPalletSvg) 커밋 abbaacd | Claude Sonnet 4.6 |
 | 2026-06-27 | Phase 5-Step1-E | 실행 화면 (CompanyParams + CompanyResult + /company/[id]) 커밋 c2fb0d4 | Claude Sonnet 4.6 |
 | 2026-06-27 | Phase 5-Step1-F | 검증 로그 + 문서 갱신 | Claude Sonnet 4.6 |
+| 2026-06-28 | Phase 5-Step2 | 마스터 JSON 분리 + outerbox 재작성 + SizedInnerCount UI 연결 + 18/18 검증 | Claude Sonnet 4.6 |

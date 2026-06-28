@@ -15,7 +15,7 @@
 | DB | Supabase 프로젝트 `lnnxjwfvzaelsoupozke` (ap-northeast-1, Tokyo) |
 | 접근 방식 | 공개 사이트 (로그인 없음) |
 | 원본 HTML | `시뮬레이션_데스크_럭셔리_dc.html` (이 파일이 레이아웃 기준) |
-| 현재 단계 | **Phase 5 Step 1 완료 — 박스·파렛트 적재 시뮬레이션 전체 구현. 다음: Phase 6 DB 연동** |
+| 현재 단계 | **Phase 5 Step 2 완료 — SizedInnerCount 사이즈 보존 + outerbox 알고리즘 개선 + master.json 분리. 다음: Phase 6 DB 연동** |
 
 ---
 
@@ -33,7 +33,7 @@
 
 ---
 
-## 📁 실제 레포지토리 구조 (Phase 5 Step 1 완료 기준)
+## 📁 실제 레포지토리 구조 (Phase 5 Step 2 완료 기준)
 
 ```
 lvhh/
@@ -55,27 +55,28 @@ lvhh/
 │   ├── layout/ (InnerHeader, Ticker)
 │   ├── home/ (HeroSection, EntryTiles, FeaturedStrategies, StatsBand, QuoteFooter)
 │   ├── stock/ (SimTile, StockCard, StockParams, StockResult)
-│   ├── company/                        ← Phase 5 Step 1 신규 ✅
+│   ├── company/                        ← Phase 5 Step 2 완료 ✅
 │   │   ├── CompanyTile.tsx
 │   │   ├── CompanyParams.tsx
 │   │   ├── CompanyResult.tsx
-│   │   ├── BoxSvg.tsx
-│   │   └── CompanyPalletSvg.tsx
+│   │   ├── BoxSvg.tsx                  (SizedInnerCount 표기)
+│   │   └── CompanyPalletSvg.tsx        (빈자리 점선 시각화)
 │   └── svg/ (LineSvg, CandleSvg, PalletSvg, IconSvg)
 ├── lib/
 │   ├── stock/ (tiles.ts)
-│   ├── company/                        ← Phase 5 Step 1 신규 ✅
-│   │   ├── data.ts      (마스터 데이터)
+│   ├── company/                        ← Phase 5 Step 2 완료 ✅
+│   │   ├── master.json  (마스터 데이터 JSON — single source of truth)
+│   │   ├── data.ts      (JSON 읽어 타입 입혀 재노출)
 │   │   ├── tiles.ts     (6타일 단일 소스)
-│   │   ├── innerbox.ts  (엔진① 인박스 분해)
-│   │   ├── outerbox.ts  (엔진② 박스 조합 FFD)
+│   │   ├── innerbox.ts  (엔진① 인박스 분해 — SizedInnerCount 반환)
+│   │   ├── outerbox.ts  (엔진② 박스 조합 — 딱떨어질때만 합침 그리디)
 │   │   ├── pallet.ts    (엔진③ 파렛트 적재)
 │   │   ├── weight.ts    (엔진④ 무게 계산)
 │   │   └── simulate.ts  (통합 오케스트레이터)
 │   ├── svg/ (generators.ts)
 │   └── supabase/ (client.ts, server.ts)
 ├── types/
-│   ├── company.ts   (Phase 5 Step 1 교체 ✅)
+│   ├── company.ts   (Phase 5 Step 2 업데이트 ✅ — SizedInnerCount 추가)
 │   ├── backtest.ts
 │   ├── stock.ts
 │   └── database.ts
@@ -83,7 +84,9 @@ lvhh/
 └── docs/
     ├── MASTER.md
     ├── PROGRESS.md
-    └── PHASE5-STEP1-PLAN.md
+    ├── PHASE5-STEP2-HANDOFF.md
+    ├── PHASE5-STEP2-IMPL-PLAN.md
+    └── PHASE5-STEP2-VERIFY-LOG.md
 ```
 
 ---
@@ -113,7 +116,7 @@ ribbon_types, label_specs, customers, delivery_routes, label_batches, label_batc
 | outer_box_types | 2 | 아웃박스 규격 (Phase 6) |
 | inner_box_types | 2 | 인박스 규격 (Phase 6) |
 
-> Phase 5 Step 1은 모두 하드코딩. Phase 6에서 DB 연동 예정.
+> Phase 5 Step 2까지 모두 하드코딩(master.json). Phase 6에서 Supabase DB 연동 예정.
 
 > 🔴 보안: 전체 18개 테이블 RLS 비활성화. Phase 7에서 처리.
 
@@ -133,7 +136,7 @@ ribbon_types, label_specs, customers, delivery_routes, label_batches, label_batc
 | BE-01 | API: 주식 (목록/range/backtest) | app/api/stocks, api/stocks/[id]/range, api/backtest | ✅ 완료 |
 | BE-02 | API: 파렛트 (DB) | app/api/pallets/route.ts | 🔲 Phase 6 |
 | BE-03 | API: 제품 | app/api/products/route.ts | 🔲 Phase 6 |
-| LIB-01 | 회사 계산 엔진 | lib/company/ (5개 엔진 + simulate) | ✅ 완료 |
+| LIB-01 | 회사 계산 엔진 | lib/company/ (master.json + data.ts + 5개 엔진 + simulate) | ✅ 완료 |
 | LIB-02 | Supabase 클라이언트 | lib/supabase/ | ✅ 완료 |
 | DB-01 | DB 스키마 | — | ✅ 완료 |
 | DB-02 | RLS 계획 | — | 🔲 Phase 7 |
@@ -150,7 +153,8 @@ ribbon_types, label_specs, customers, delivery_routes, label_batches, label_batc
 ✅ Phase 4 — 주식 시뮬레이션 (FE-03, FE-04, BE-01) — Python FastAPI(Railway) 연동
 ✅ Phase 4.5 — ETF 그리드 재설계 + 직접입력 + 조회 3-상태 UX
 ✅ Phase 5 Step 1 — 박스·파렛트 적재 시뮬레이션 (FE-05, FE-06, LIB-01) — 10개 케이스 검증
-🔲 Phase 6 — DB 연동 (하드코딩 → Supabase)
+✅ Phase 5 Step 2 — SizedInnerCount 사이즈 보존 + outerbox 알고리즘 개선 + master.json JSON 분리 — 18개 케이스 검증
+🔲 Phase 6 — DB 연동 (master.json → Supabase)
 🔲 Phase 7 — 보안 (RLS)
 🔲 Phase 8 — Vercel 배포 & 검증
 ```
