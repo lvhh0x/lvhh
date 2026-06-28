@@ -98,7 +98,7 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
       </h2>
       <p
         style={{
-          fontFamily: 'var(--font-manrope), sans-serif',
+          fontFamily: 'system-ui, sans-serif',
           fontSize: '11px',
           color: '#9C9486',
           margin: '0 0 18px',
