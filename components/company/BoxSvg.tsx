@@ -1,70 +1,73 @@
-// 박스 그림 (Phase 5 Step 1) — 인박스/아웃박스/택배박스/낱개를 단순 아이소메트릭 박스로 표현.
-// 종류별 색/라벨만 다르고 형상은 공통(정면+윗면+측면 3D 박스).
+// 박스 그림 (Phase 5 Step 2) — SizedInnerCount 기반으로 사이즈·미터·수량 표기
+// 종류별 색/라벨은 유지, 내용물 한 줄씩 표기 (SVG 높이 동적 확장)
 
-import type { OuterBoxKind, InnerBoxCount } from '@/types/company';
+import type { SizedInnerCount, OuterBoxKind } from '@/types/company';
 
 type BoxVisualKind = OuterBoxKind | 'loose';
 
 interface Props {
   kind: BoxVisualKind;
-  contents: InnerBoxCount[];
+  contents: SizedInnerCount[];
   filled: boolean;
   size?: number;
 }
 
-// 종류별 표시 속성
 function visual(kind: BoxVisualKind): { label: string; face: string; top: string; side: string } {
   switch (kind) {
-    case 'outer':
-      return { label: '아웃박스', face: '#C9A86A', top: '#DCC08A', side: '#A8884E' };
-    case 'courier':
-      return { label: '택배박스', face: '#8FBFA0', top: '#A8D4B8', side: '#6E9A80' };
-    case 'loose':
-      return { label: '낱개(인박스)', face: '#9C9486', top: '#B6AEA0', side: '#7A7264' };
+    case 'outer':   return { label: '\uc544\uc6c3\ubc15\uc2a4',    face: '#C9A86A', top: '#DCC08A', side: '#A8884E' };
+    case 'courier': return { label: '\ud0dd\ubc30\ubc15\uc2a4',    face: '#8FBFA0', top: '#A8D4B8', side: '#6E9A80' };
+    case 'loose':   return { label: '\ub099\uac1c(\uc778\ubc15\uc2a4)', face: '#9C9486', top: '#B6AEA0', side: '#7A7264' };
   }
 }
 
-function contentsText(contents: InnerBoxCount[]): string {
-  if (contents.length === 0) return '';
-  return contents.map(c => `${c.kind}×${c.count}`).join(' · ');
+/** \ub0b4\uc6a9\ubb3c \ud14d\uc2a4\ud2b8 1\uc904: "40\u00d7300m 145\u00d73(90\uac1c)" */
+function contentLine(c: SizedInnerCount): string {
+  return `${c.size}\u00d7${c.meter}m ${c.kind}\u00d7${c.count}(${c.productQty}\uac1c)`;
 }
 
 export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
   const v = visual(kind);
   const w = size;
-  const h = size;
 
-  // 아이소메트릭 박스 좌표 (정면 사각형 + 윗면 평행사변형 + 측면 평행사변형)
+  // \ubc15\uc2a4 \uc544\uc774\uc18c\uba54\ud2b8\ub9ad \uc88c\ud45c (\ubaa8\ub450 w \uae30\uc900)
   const depth = w * 0.22;
-  const bx = w * 0.16;          // 정면 좌측 x
-  const by = h * 0.30;          // 정면 상단 y
-  const bw = w * 0.56;          // 정면 너비
-  const bh = h * 0.50;          // 정면 높이
+  const bx    = w * 0.16;
+  const by    = w * 0.26;   // \ubc15\uc2a4\ub97c \uc0b4\uc9dd \uc704\ub85c (\ub77c\ubca8 \uacf5\uac04 \ud655\ubcf4)
+  const bw    = w * 0.56;
+  const bh    = w * 0.50;
+
+  // \ub77c\ubca8 \u00b7 \ub0b4\uc6a9\ubb3c \ub808\uc774\uc544\uc6c3
+  const labelFontSize   = Math.round(w * 0.095);
+  const contentFontSize = Math.round(w * 0.080);
+  const lineH           = contentFontSize + 4;
+  const labelY          = Math.round(w * 0.88);
+  const firstContentY   = labelY + lineH + 1;
+  const totalH          = firstContentY + contents.length * lineH + 4;
 
   return (
     <svg
-      viewBox={`0 0 ${w} ${h}`}
+      viewBox={`0 0 ${w} ${totalH}`}
       width={w}
-      height={h}
+      height={totalH}
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label={v.label}
     >
-      {/* 윗면 */}
+      {/* \uc6d4\uba74 */}
       <polygon
         points={`${bx},${by} ${bx + bw},${by} ${bx + bw + depth},${by - depth} ${bx + depth},${by - depth}`}
         fill={v.top}
         stroke="rgba(20,17,14,0.5)"
         strokeWidth="1"
       />
-      {/* 측면 */}
+      {/* \uce21\uba74 */}
       <polygon
         points={`${bx + bw},${by} ${bx + bw},${by + bh} ${bx + bw + depth},${by + bh - depth} ${bx + bw + depth},${by - depth}`}
         fill={v.side}
         stroke="rgba(20,17,14,0.5)"
         strokeWidth="1"
       />
-      {/* 정면 */}
+      {/* \uc815\uba74 */}
       <rect
         x={bx}
         y={by}
@@ -75,7 +78,7 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
         strokeWidth="1"
         opacity={filled ? 1 : 0.7}
       />
-      {/* 정면 테이프 라인 (꽉 찬 박스 표시) */}
+      {/* \ud14c\uc774\ud504 \ub77c\uc778 (\uaf49 \ucc2c \ubc15\uc2a4 \ud45c\uc2dc) */}
       {filled && (
         <line
           x1={bx + bw / 2}
@@ -87,30 +90,32 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
         />
       )}
 
-      {/* 라벨 */}
+      {/* \uc885\ub958 \ub77c\ubca8 */}
       <text
         x={w / 2}
-        y={h * 0.90}
+        y={labelY}
         textAnchor="middle"
         fontFamily="var(--font-jetbrains-mono), monospace"
-        fontSize={w * 0.085}
+        fontSize={labelFontSize}
         fill="#E8E0D2"
       >
         {v.label}
       </text>
-      {/* 내용물 */}
-      {contents.length > 0 && (
+
+      {/* \ub0b4\uc6a9\ubb3c \ud55c \uc904\uc529 (\uc0ac\uc774\uc988\u00b7\ubbf8\ud130\u00b7\uc778\ubc15\uc2a4\uc885\ub958\u00b7\uc218\ub7c9\u00b7\uc81c\ud488\uc218\ub7c9) */}
+      {contents.map((c, i) => (
         <text
+          key={i}
           x={w / 2}
-          y={h * 0.99}
+          y={firstContentY + i * lineH}
           textAnchor="middle"
           fontFamily="var(--font-jetbrains-mono), monospace"
-          fontSize={w * 0.07}
+          fontSize={contentFontSize}
           fill="#9C9486"
         >
-          {contentsText(contents)}
+          {contentLine(c)}
         </text>
-      )}
+      ))}
     </svg>
   );
 }
