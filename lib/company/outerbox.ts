@@ -5,9 +5,9 @@
 //   1단계   제품별 풀 아웃박스(60단위) 추출 → 사이즈별 잔여(<60) 수집
 //   2단계-a 누적 잔여를 사이즈별로 합쳐 풀 한 번 더 추출(같은 사이즈 여러 행 대비)
 //   2단계-b 합침 그리디: 잔여 많은 사이즈 seed + 다른 사이즈를 '통째로' 조합해
-//           60단위를 정확히 채우면 합쳐 풀 아웃박스, 못 채우면 seed 단독 처리
+//           60단위를 정확히 채우면 합쳐 풀 아웃박스, 못 채우면 잔여 청크로 누적
 //           · 덩어리는 쪼개지 않음 / 3사이즈+ 혼합 허용 / 동률 시 잔여 많은(같으면 큰 사이즈) 우선
-//   단독    택배 단위 합 ≤12 → (인박스 2개+ → 택배 / 1개 → 낱개), 초과 → 부분 아웃박스
+//   잔여    정확 합침 불가 청크들을 FFD로 묶어 택배/낱개/부분아웃박스 결정
 
 import type {
   SizedInnerCount,
@@ -158,16 +158,46 @@ function findExactFillSubset(others: Chunk[], gap: number): Chunk[] | null {
   return best;
 }
 
-// ─── 단독 처리: 택배 / 낱개 / 부분 아웃박스 ───────────────────────────────────
+// ─── 잔여 처리: 정확 합침 불가 청크들을 FFD로 묶어 택배/낱개/부분아웃박스 처리 ──
 
-function finalizeSingle(chunk: Chunk): PackedBox {
-  const courierUnits = courierUnitsOf(chunk.flat);
-  if (courierUnits <= COURIER_CAP) {
-    const kind: PackedBox['kind'] = chunk.flat.length === 1 ? 'loose' : 'courier';
-    return { kind, contents: compressSized(chunk.flat), filled: false, weight: 0 };
+function finalizeResidualChunks(chunks: Chunk[]): PackedBox[] {
+  if (chunks.length === 0) return [];
+
+  // 덩어리 크기 내림차순 정렬 후 FFD 빈 패킹 (청크는 쪼개지 않음)
+  const sorted = [...chunks].sort((a, b) => (b.units - a.units) || (b.size - a.size));
+  const bins: Chunk[][] = [];
+  const binSums: number[] = [];
+
+  for (const chunk of sorted) {
+    let placed = false;
+    for (let i = 0; i < bins.length; i++) {
+      if (binSums[i] + chunk.units <= OUTER_CAP) {
+        bins[i].push(chunk);
+        binSums[i] += chunk.units;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      bins.push([chunk]);
+      binSums.push(chunk.units);
+    }
   }
-  // 택배 용량 초과 → 부분 아웃박스 (잔여 <60단위라 1개에 담김)
-  return { kind: 'outer', contents: compressSized(chunk.flat), filled: false, weight: 0 };
+
+  return bins.map((binChunks, i) => {
+    const allFlat = binChunks.flatMap(c => c.flat);
+    const binSum = binSums[i];
+
+    if (binSum === OUTER_CAP) {
+      return { kind: 'outer' as const, contents: compressSized(allFlat), filled: true, weight: 0 };
+    }
+    const cuUnits = courierUnitsOf(allFlat);
+    if (cuUnits <= COURIER_CAP) {
+      const kind: PackedBox['kind'] = allFlat.length === 1 ? 'loose' : 'courier';
+      return { kind, contents: compressSized(allFlat), filled: false, weight: 0 };
+    }
+    return { kind: 'outer' as const, contents: compressSized(allFlat), filled: false, weight: 0 };
+  });
 }
 
 // ─── 메인 함수 ─────────────────────────────────────────────────────────────
@@ -212,6 +242,8 @@ export function packIntoBoxes(perProduct: SizedInnerCount[][]): PackedBox[] {
   }
 
   // 2단계-b: 합침 그리디
+  const residualChunks: Chunk[] = [];
+
   while (chunks.length > 0) {
     // 잔여 많은 순 (동률 시 큰 사이즈 먼저)
     chunks.sort((a, b) => (b.units - a.units) || (b.size - a.size));
@@ -234,10 +266,14 @@ export function packIntoBoxes(perProduct: SizedInnerCount[][]): PackedBox[] {
       const remove = new Set<Chunk>([seed, ...fill]);
       chunks = chunks.filter(c => !remove.has(c));
     } else {
-      result.push(finalizeSingle(seed));
+      // 정확 합침 불가 → 나머지 청크들과 함께 FFD로 처리
+      residualChunks.push(seed);
       chunks = chunks.filter(c => c !== seed);
     }
   }
+
+  // 잔여 청크 일괄 처리 (FFD로 묶어 부분아웃박스/택배/낱개 결정)
+  result.push(...finalizeResidualChunks(residualChunks));
 
   return result;
 }
