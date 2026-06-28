@@ -10,6 +10,7 @@
  *   1~14  기존 합의/단품 경계 (새 규칙 기준 재확인)
  *   15~17 HANDOFF §4.4 예시 A/B/C
  *   18    3사이즈 혼합 합침
+ *   19    낱개 버그 회귀 (finalizeResidualChunks)
  *
  * 실행: npx ts-node -r tsconfig-paths/register --compiler-options '{"module":"commonjs"}' scripts/test-step4.ts
  */
@@ -116,6 +117,9 @@ const cases: TestCase[] = [
   // ── 18 3사이즈 혼합 합침
   { name: '18 3사이즈 40x60 + 60x20 + 110x10', params: { products: [P(40,60), P(60,20), P(110,10)], palletId: null },
     expected: { outer: 1, courier: 0, loose: 0, note: '40잔여30 + (60잔여15+110잔여15)=60 합침' } },
+  // ── 19 낱개 버그 회귀 (finalizeResidualChunks): 정확합침 불가 잔여를 FFD로 묶어 부분 아웃박스1
+  { name: '19 낱개버그회귀 40x20 + 60x20 + 110x10', params: { products: [P(40,20), P(60,20), P(110,10)], palletId: null },
+    expected: { outer: 1, courier: 0, loose: 0, note: '잔여 40u(60미달)·courier13u(12초과) -> 부분 아웃박스1(filled=false), 낱개0' } },
 ];
 
 console.log('='.repeat(72));
