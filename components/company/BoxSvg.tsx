@@ -25,24 +25,32 @@ function contentLine(c: SizedInnerCount): string {
   return `${c.size}\u00d7${c.meter}m ${c.kind}\u00d7${c.count}(${c.productQty}\uac1c)`;
 }
 
+/** \ub192\uc774 \ubc30\uc728: outer=1.0 / courier=0.5 / loose=0.25 */
+function heightMult(kind: BoxVisualKind): number {
+  if (kind === 'courier') return 0.5;
+  if (kind === 'loose')   return 0.25;
+  return 1.0;
+}
+
 export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
   const v = visual(kind);
   const w = size;
 
-  // \ubc15\uc2a4 \uc544\uc774\uc18c\uba54\ud2b8\ub9ad \uc88c\ud45c (\ubaa8\ub450 w \uae30\uc900)
+  // \ubc15\uc2a4 \uc544\uc774\uc18c\uba54\ud2b8\ub9ad \uc88c\ud45c (bh\ub9cc \uc885\ub958\ubcc4 \ucd95\uc18c)
   const depth = w * 0.22;
   const bx    = w * 0.16;
-  const by    = w * 0.26;   // \ubc15\uc2a4\ub97c \uc0b4\uc9dd \uc704\ub85c (\ub77c\ubca8 \uacf5\uac04 \ud655\ubcf4)
+  const by    = w * 0.26;
   const bw    = w * 0.56;
-  const bh    = w * 0.50;
+  const bh    = w * 0.50 * heightMult(kind);
 
-  // \ub77c\ubca8 \u00b7 \ub0b4\uc6a9\ubb3c \ub808\uc774\uc544\uc6c3
-  const labelFontSize   = Math.round(w * 0.095);
-  const contentFontSize = Math.round(w * 0.080);
-  const lineH           = contentFontSize + 4;
-  const labelY          = Math.round(w * 0.88);
-  const firstContentY   = labelY + lineH + 1;
-  const totalH          = firstContentY + contents.length * lineH + 4;
+  // \ub77c\ubca8\u00b7\ub0b4\uc6a9\ubb3c \ub808\uc774\uc544\uc6c3 (\ubc15\uc2a4 \ud558\ub2e8 \uae30\uc900)
+  const labelFontSize   = Math.round(w * 0.115);
+  const contentFontSize = Math.round(w * 0.100);
+  const lineH           = contentFontSize + 5;
+  const boxBottom       = by + bh;
+  const labelY          = Math.round(boxBottom + w * 0.10);
+  const firstContentY   = labelY + lineH + 2;
+  const totalH          = firstContentY + contents.length * lineH + 6;
 
   return (
     <svg
@@ -98,6 +106,7 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
         fontFamily="var(--font-jetbrains-mono), monospace"
         fontSize={labelFontSize}
         fill="#E8E0D2"
+        style={{ fontFeatureSettings: "'zero' 0" }}
       >
         {v.label}
       </text>
@@ -112,6 +121,7 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
           fontFamily="var(--font-jetbrains-mono), monospace"
           fontSize={contentFontSize}
           fill="#9C9486"
+          style={{ fontFeatureSettings: "'zero' 0" }}
         >
           {contentLine(c)}
         </text>
