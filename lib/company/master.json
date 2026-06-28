@@ -1,0 +1,51 @@
+{
+  "_rules": {
+    "설명": "MERIDIAN 회사 시뮬레이션 마스터 데이터. 값을 바꿀 때는 반드시 이 파일에서만 바꾼다 (single source of truth). data.ts가 이 JSON을 읽어 타입을 입혀 재노출한다.",
+    "단위표_규칙": {
+      "아웃박스_총용량단위": 60,
+      "택배박스_총용량단위": 12,
+      "인박스_단위": {
+        "145": { "아웃박스": 15, "택배박스": 5, "메모": "아웃박스에 4개=60, 택배에 2개=10" },
+        "95": { "아웃박스": 10, "택배박스": 3, "메모": "아웃박스에 6개=60, 택배에 4개=12" },
+        "60": { "아웃박스": 6, "택배박스": 2, "메모": "아웃박스에 10개=60, 택배에 6개=12" }
+      },
+      "검증된_조합_예시": {
+        "아웃박스(60)": ["145x4=60", "145x2+95x3=60", "145x2+60x5=60", "60x10=60", "145x3+95x1=55(남음)"],
+        "택배박스(12)": ["95x4=12", "145x2=10(남음)", "145x1+95x2=11(남음)", "95x3=9(남음)"]
+      }
+    },
+    "무게_규칙": "제품 1개 무게는 모름. 풀 아웃박스 총무게에서 tare(아웃박스0.5 + 145인박스0.22x4)를 빼고 풀수량으로 나눠 역산. 60인박스/택배박스 tare는 미상이라 0 placeholder → weightIncomplete 플래그.",
+    "단위_주의": "수량(제품 개수)과 단위(unit)는 다르다. 예: 40사이즈 제품 30개 = 145인박스 1개 = 15단위."
+  },
+
+  "products": [
+    { "size": 40,  "meter": 300, "fullOuterQty": 120, "fullOuterWeight": 15.92, "innerCapacity": { "145": 30, "95": 20, "60": 10 } },
+    { "size": 60,  "meter": 300, "fullOuterQty": 80,  "fullOuterWeight": 15.80, "innerCapacity": { "145": 20, "95": 10, "60": null } },
+    { "size": 110, "meter": 300, "fullOuterQty": 40,  "fullOuterWeight": 15.00, "innerCapacity": { "145": 10, "95": null, "60": null } }
+  ],
+
+  "innerBoxes": [
+    { "kind": 145, "w": 340, "d": 150, "h": 150, "tare": 0.22 },
+    { "kind": 95,  "w": 340, "d": 150, "h": 95,  "tare": 0.16 },
+    { "kind": 60,  "w": 340, "d": 150, "h": 60,  "tare": 0.00 }
+  ],
+
+  "outerBoxes": [
+    { "kind": "outer",   "label": "아웃박스", "w": 355, "d": 315, "h": 315, "tare": 0.50, "perLayerUnit": 15, "capacityUnit": 60 },
+    { "kind": "courier", "label": "택배박스", "w": 315, "d": 315, "h": 215, "tare": 0.00, "perLayerUnit": 5,  "capacityUnit": 12 }
+  ],
+
+  "pallets": [
+    { "id": "700-wood",       "label": "700파렛트 (나무)",   "w": 710,  "d": 750,  "h": 140, "tare": 9.0,  "boxesPerLayer": 4 },
+    { "id": "900-wood",       "label": "900파렛트 (나무)",   "w": 900,  "d": 710,  "h": 140, "tare": 12.4, "boxesPerLayer": 6 },
+    { "id": "1100-wood",      "label": "1100파렛트 (나무)",  "w": 1100, "d": 1100, "h": 190, "tare": 23.3, "boxesPerLayer": 9 },
+    { "id": "1100-plastic-a", "label": "A 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 10.5, "boxesPerLayer": 9 },
+    { "id": "1100-plastic-b", "label": "B 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 18.5, "boxesPerLayer": 9 }
+  ],
+
+  "innerUnits": {
+    "145": { "outer": 15, "courier": 5 },
+    "95":  { "outer": 10, "courier": 3 },
+    "60":  { "outer": 6,  "courier": 2 }
+  }
+}

@@ -1,30 +1,37 @@
-// 엔진② — 박스 조합 (Phase 5 Step 2 재작성)
+// 엔진② — 박스 조합 (Phase 5 Step 2 재작성: 사이즈 보존 + 정확-합침 규칙)
 // 입력: 제품별 SizedInnerCount[][] (사이즈 정보 보존)
 //
-// 알고리즘 (계획서 §4):
-//   ① 제품별 풀 아웃박스(60단위) 추출 → 사이즈별 잔여 수집
-//   ② 잔여 풀 FFD(60단위) → 모든 bin==60이면 합치, 하나라도 <60이면 분리
-//   ③ 분리 시: 같은 사이즈끼리 묶어 낙개/택배(cap=12)/아웃박스(cap=60) 처리
+// 알고리즘 (HANDOFF §4 / IMPL-PLAN §2.3):
+//   1단계   제품별 풀 아웃박스(60단위) 추출 → 사이즈별 잔여(<60) 수집
+//   2단계-a 누적 잔여를 사이즈별로 합쳐 풀 한 번 더 추출(같은 사이즈 여러 행 대비)
+//   2단계-b 합침 그리디: 잔여 많은 사이즈 seed + 다른 사이즈를 '통째로' 조합해
+//           60단위를 정확히 채우면 합쳐 풀 아웃박스, 못 채우면 seed 단독 처리
+//           · 덩어리는 쪼개지 않음 / 3사이즈+ 혼합 허용 / 동률 시 잔여 많은(같으면 큰 사이즈) 우선
+//   단독    택배 단위 합 ≤12 → (인박스 2개+ → 택배 / 1개 → 낱개), 초과 → 부분 아웃박스
 
 import type {
   SizedInnerCount,
   InnerBoxKind,
-  OuterBoxKind,
   PackedBox,
 } from '@/types/company';
-import { INNER_UNITS } from './data';
-
-const OUTER_CAP = 60;
-const COURIER_CAP = 12;
+import { INNER_UNITS, OUTER_CAP, COURIER_CAP } from './data';
 
 // ─── 내부 헬퍼 타입 ────────────────────────────────────────────────────────
 
-/** 인박스 1개 단위 (전개 후 FFD에 사용) */
+/** 인박스 1개 단위 (전개 후 패킹에 사용) */
 type FlatInner = {
   size: number;
   meter: number;
   kind: InnerBoxKind;
   productQtyPerBox: number; // 이 인박스 1개에 담긴 제품 수
+};
+
+/** 같은 (size, meter) 잔여 덩어리 — 합침 그리디의 원자 단위 */
+type Chunk = {
+  size: number;
+  meter: number;
+  units: number;      // 아웃박스 기준 단위 합 (<60)
+  flat: FlatInner[];
 };
 
 // ─── 전개 / 압축 ────────────────────────────────────────────────────────────────
@@ -66,19 +73,26 @@ function compressSized(items: FlatInner[]): SizedInnerCount[] {
     }));
 }
 
-// ─── 단계①: 제품별 풀 아웃박스 추출 + 잔여 분리 ─────────────────────
+function outerUnitsOf(flat: FlatInner[]): number {
+  return flat.reduce((acc, f) => acc + INNER_UNITS[f.kind].outer, 0);
+}
 
-function extractFullAndRemainder(
-  productItems: SizedInnerCount[],
-): { fullBoxes: PackedBox[]; remainder: FlatInner[] } {
-  const flat = expandSized(productItems);
+function courierUnitsOf(flat: FlatInner[]): number {
+  return flat.reduce((acc, f) => acc + INNER_UNITS[f.kind].courier, 0);
+}
+
+// ─── 풀 아웃박스(60단위) FFD 추출 ────────────────────────────────────────────
+
+/** flat 인박스를 60단위 bin에 FFD로 담아, 60 딱 찬 bin은 풀 아웃박스, 나머지는 잔여로 반환 */
+function extractFullOuters(flat: FlatInner[]): { fullBoxes: PackedBox[]; remainder: FlatInner[] } {
   if (flat.length === 0) return { fullBoxes: [], remainder: [] };
 
+  const sorted = [...flat].sort((a, b) => b.kind - a.kind);
   const bins: FlatInner[][] = [];
   const binSums: number[] = [];
 
-  for (const item of flat) {
-    const u = INNER_UNITS[item.kind]['outer'];
+  for (const item of sorted) {
+    const u = INNER_UNITS[item.kind].outer;
     let placed = false;
     for (let i = 0; i < bins.length; i++) {
       if (binSums[i] + u <= OUTER_CAP) {
@@ -96,78 +110,64 @@ function extractFullAndRemainder(
 
   const fullBoxes: PackedBox[] = [];
   const remainder: FlatInner[] = [];
-
   for (let i = 0; i < bins.length; i++) {
     if (binSums[i] === OUTER_CAP) {
-      fullBoxes.push({
-        kind: 'outer',
-        contents: compressSized(bins[i]),
-        filled: true,
-        weight: 0,
-      });
+      fullBoxes.push({ kind: 'outer', contents: compressSized(bins[i]), filled: true, weight: 0 });
     } else {
-      for (const item of bins[i]) remainder.push(item);
+      remainder.push(...bins[i]);
     }
   }
-
   return { fullBoxes, remainder };
 }
 
-// ─── 단계③-분리: 같은 사이즈 잔여 → 낙개/택배/아웃박스 ───────────────
+// ─── 합침 그리디: 빈자리에 정확히 들어맞는 다른 사이즈 조합 찾기 ───────────────
 
-function packRemainderBySizeGroup(items: FlatInner[]): PackedBox[] {
-  const result: PackedBox[] = [];
-  let rem = [...items].sort((a, b) => b.kind - a.kind);
+/** desc 정렬된 두 단위 배열을 사전식 비교 (큰 쪽이 우선) — '잔여 많은 사이즈 우선' 결정 반영 */
+function compareUnitsDesc(a: number[], b: number[]): number {
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i++) {
+    const av = a[i] ?? -1;
+    const bv = b[i] ?? -1;
+    if (av !== bv) return av - bv;
+  }
+  return 0;
+}
 
-  while (rem.length > 0) {
-    if (rem.length === 1) {
-      // 인박스 1개 → 낙개
-      result.push({ kind: 'loose', contents: compressSized(rem), filled: false, weight: 0 });
-      break;
-    }
+/** others 중 단위 합이 정확히 gap이 되는 부분집합. 여럿이면 '잔여 많은 사이즈를 포함한' 조합 우선. */
+function findExactFillSubset(others: Chunk[], gap: number): Chunk[] | null {
+  const n = others.length;
+  let best: Chunk[] | null = null;
+  let bestKey: number[] = [];
 
-    // 택배박스(cap=12) 시도
-    const courierItems: FlatInner[] = [];
-    let courierSum = 0;
-    const stillLeft: FlatInner[] = [];
-
-    for (const item of rem) {
-      const u = INNER_UNITS[item.kind]['courier'];
-      if (courierSum + u <= COURIER_CAP) {
-        courierItems.push(item);
-        courierSum += u;
-      } else {
-        stillLeft.push(item);
+  for (let mask = 1; mask < (1 << n); mask++) {
+    let sum = 0;
+    const subset: Chunk[] = [];
+    for (let i = 0; i < n; i++) {
+      if (mask & (1 << i)) {
+        subset.push(others[i]);
+        sum += others[i].units;
       }
     }
-
-    if (stillLeft.length === 0) {
-      // 전부 택배 1개에 담김
-      const boxKind: OuterBoxKind | 'loose' = courierItems.length === 1 ? 'loose' : 'courier';
-      result.push({ kind: boxKind, contents: compressSized(courierItems), filled: false, weight: 0 });
-      break;
-    } else {
-      // 택배 초과 → 아웃박스(cap=60) 그리디 1개
-      const outerItems: FlatInner[] = [];
-      let outerSum = 0;
-      const overflow: FlatInner[] = [];
-
-      for (const item of rem) {
-        const u = INNER_UNITS[item.kind]['outer'];
-        if (outerSum + u <= OUTER_CAP) {
-          outerItems.push(item);
-          outerSum += u;
-        } else {
-          overflow.push(item);
-        }
-      }
-
-      result.push({ kind: 'outer', contents: compressSized(outerItems), filled: false, weight: 0 });
-      rem = overflow;
+    if (sum !== gap) continue;
+    const key = subset.map(c => c.units).sort((x, y) => y - x);
+    if (best === null || compareUnitsDesc(key, bestKey) > 0) {
+      best = subset;
+      bestKey = key;
     }
   }
+  return best;
+}
 
-  return result;
+// ─── 단독 처리: 택배 / 낱개 / 부분 아웃박스 ───────────────────────────────────
+
+function finalizeSingle(chunk: Chunk): PackedBox {
+  const courierUnits = courierUnitsOf(chunk.flat);
+  if (courierUnits <= COURIER_CAP) {
+    const kind: PackedBox['kind'] = chunk.flat.length === 1 ? 'loose' : 'courier';
+    return { kind, contents: compressSized(chunk.flat), filled: false, weight: 0 };
+  }
+  // 택배 용량 초과 → 부분 아웃박스 (잔여 <60단위라 1개에 담김)
+  return { kind: 'outer', contents: compressSized(chunk.flat), filled: false, weight: 0 };
 }
 
 // ─── 메인 함수 ─────────────────────────────────────────────────────────────
@@ -178,65 +178,64 @@ function packRemainderBySizeGroup(items: FlatInner[]): PackedBox[] {
  */
 export function packIntoBoxes(perProduct: SizedInnerCount[][]): PackedBox[] {
   const result: PackedBox[] = [];
-  const allRemainders: FlatInner[] = [];
 
-  // ① 제품별 풀 아웃박스 추출 + 잔여 수집
+  // 1단계: 제품별 풀 아웃박스 추출 + 잔여 수집
+  const allRemainders: FlatInner[] = [];
   for (const productItems of perProduct) {
-    const { fullBoxes, remainder } = extractFullAndRemainder(productItems);
+    const { fullBoxes, remainder } = extractFullOuters(expandSized(productItems));
     result.push(...fullBoxes);
     allRemainders.push(...remainder);
   }
-
   if (allRemainders.length === 0) return result;
 
-  // ② 잔여 풀 FFD (60단위) → 빈칸 판정
-  const sortedRem = [...allRemainders].sort((a, b) => b.kind - a.kind);
-  const remBins: FlatInner[][] = [];
-  const remBinSums: number[] = [];
+  // 2단계-a: 사이즈(size,meter)별로 합쳐 풀 한 번 더 추출 → 사이즈별 잔여 <60 보장
+  const bySize = new Map<string, FlatInner[]>();
+  for (const item of allRemainders) {
+    const key = `${item.size}_${item.meter}`;
+    const arr = bySize.get(key);
+    if (arr) arr.push(item);
+    else bySize.set(key, [item]);
+  }
 
-  for (const item of sortedRem) {
-    const u = INNER_UNITS[item.kind]['outer'];
-    let placed = false;
-    for (let i = 0; i < remBins.length; i++) {
-      if (remBinSums[i] + u <= OUTER_CAP) {
-        remBins[i].push(item);
-        remBinSums[i] += u;
-        placed = true;
-        break;
-      }
-    }
-    if (!placed) {
-      remBins.push([item]);
-      remBinSums.push(u);
+  let chunks: Chunk[] = [];
+  for (const flat of Array.from(bySize.values())) {
+    const { fullBoxes, remainder } = extractFullOuters(flat);
+    result.push(...fullBoxes);
+    if (remainder.length > 0) {
+      chunks.push({
+        size: remainder[0].size,
+        meter: remainder[0].meter,
+        units: outerUnitsOf(remainder),
+        flat: remainder,
+      });
     }
   }
 
-  const allFull = remBinSums.every(s => s === OUTER_CAP);
+  // 2단계-b: 합침 그리디
+  while (chunks.length > 0) {
+    // 잔여 많은 순 (동률 시 큰 사이즈 먼저)
+    chunks.sort((a, b) => (b.units - a.units) || (b.size - a.size));
+    const seed = chunks[0];
+    const others = chunks.slice(1);
 
-  if (allFull) {
-    // 합치: 섬인 아웃박스로 확정 (filled=true)
-    for (const bin of remBins) {
-      result.push({
-        kind: 'outer',
-        contents: compressSized(bin),
-        filled: true,
-        weight: 0,
-      });
+    if (seed.units === OUTER_CAP) {
+      // 방어적: 정확히 꽉 찬 덩어리는 풀 아웃박스
+      result.push({ kind: 'outer', contents: compressSized(seed.flat), filled: true, weight: 0 });
+      chunks = others;
+      continue;
     }
-  } else {
-    // 분리: 사이즈별로 묶어 처리
-    const sizeGroups = new Map<string, FlatInner[]>();
-    for (const item of allRemainders) {
-      const key = `${item.size}_${item.meter}`;
-      const group = sizeGroups.get(key);
-      if (group) {
-        group.push(item);
-      } else {
-        sizeGroups.set(key, [item]);
-      }
-    }
-    for (const items of Array.from(sizeGroups.values())) {
-      result.push(...packRemainderBySizeGroup(items));
+
+    const gap = OUTER_CAP - seed.units;
+    const fill = findExactFillSubset(others, gap);
+
+    if (fill) {
+      const merged = [...seed.flat, ...fill.flatMap(c => c.flat)];
+      result.push({ kind: 'outer', contents: compressSized(merged), filled: true, weight: 0 });
+      const remove = new Set<Chunk>([seed, ...fill]);
+      chunks = chunks.filter(c => !remove.has(c));
+    } else {
+      result.push(finalizeSingle(seed));
+      chunks = chunks.filter(c => c !== seed);
     }
   }
 
