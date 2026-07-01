@@ -106,11 +106,11 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
         {/* 박스 그림들 */}
         <div
           style={{
-            display: 'flex',
-            flexWrap: 'wrap',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
             gap: '12px',
             marginBottom: '18px',
-            alignItems: 'flex-end',
+            alignItems: 'end',
           }}
         >
           {result.boxes.map((box, i) => (
