@@ -14,35 +14,35 @@ interface Props {
 
 function visual(kind: BoxVisualKind): { label: string; face: string; top: string; side: string } {
   switch (kind) {
-    case 'outer':   return { label: '\uc544\uc6c3\ubc15\uc2a4',    face: '#C9A86A', top: '#DCC08A', side: '#A8884E' };
-    case 'courier': return { label: '\ud0dd\ubc30\ubc15\uc2a4',    face: '#8FBFA0', top: '#A8D4B8', side: '#6E9A80' };
-    case 'loose':   return { label: '\ub0b1\uac1c(\uc778\ubc15\uc2a4)', face: '#9C9486', top: '#B6AEA0', side: '#7A7264' };
+    case 'outer':   return { label: '아웃박스',    face: '#C9A86A', top: '#DCC08A', side: '#A8884E' };
+    case 'courier': return { label: '택배박스',    face: '#8FBFA0', top: '#A8D4B8', side: '#6E9A80' };
+    case 'loose':   return { label: '낱개(인박스)', face: '#9C9486', top: '#B6AEA0', side: '#7A7264' };
   }
 }
 
-/** \ub0b4\uc6a9\ubb3c \ud14d\uc2a4\ud2b8 1\uc904: "40\u00d7300m 145\u00d73(90\uac1c)" */
+/** 내용물 텍스트 1줄: "40×300m 145×3(90개)" */
 function contentLine(c: SizedInnerCount): string {
-  return `${c.size}\u00d7${c.meter}m ${c.kind}\u00d7${c.count}(${c.productQty}\uac1c)`;
+  return `${c.size}×${c.meter}m ${c.kind}×${c.count}(${c.productQty}개)`;
 }
 
-/** \ub192\uc774 \ubc30\uc728: outer=1.0 / courier=0.5 / loose=0.25 */
+/** 높이 배율: outer=1.0 / courier=0.5 / loose=0.25 */
 function heightMult(kind: BoxVisualKind): number {
   if (kind === 'courier') return 0.5;
   if (kind === 'loose')   return 0.25;
   return 1.0;
 }
 
-/** \ub0b4\uc6a9\ubb3c \ud55c \uc904 \ud3ed \ucd94\uc815(px) \u2014 \uc11c\ubc84 \ub80c\ub354\ub77c \uc2e4\uce21 \ubd88\uac00 \u2192 \uae00\uc790\ubcc4 \ub113\ub113\ud55c \ucd94\uc815(\uacfc\uc18c\ucd94\uc815 \ubc29\uc9c0) */
+/** 내용물 한 줄 폭 추정(px) — 서버 렌더라 실측 불가 → 글자별 넓넓한 추정(과소추정 방지) */
 function estimateLineWidth(str: string, fontSize: number): number {
   let units = 0;
   for (const ch of str) {
     const code = ch.codePointAt(0) ?? 0;
-    if (code >= 0xac00 && code <= 0xd7a3) units += 1.0;   // \ud55c\uae00(\uc804\uac01)
-    else if (ch >= '0' && ch <= '9')      units += 0.6;   // \uc22b\uc790
-    else if (ch === '\u00d7')             units += 0.65;  // \u00d7
+    if (code >= 0xac00 && code <= 0xd7a3) units += 1.0;   // 한글(전각)
+    else if (ch >= '0' && ch <= '9')      units += 0.6;   // 숫자
+    else if (ch === '×')             units += 0.65;  // ×
     else if (ch === 'm')                  units += 0.88;
     else if (ch === ' ')                  units += 0.32;
-    else                                  units += 0.5;   // ( ) \ub4f1
+    else                                  units += 0.5;   // ( ) 등
   }
   return units * fontSize;
 }
@@ -51,24 +51,24 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
   const v = visual(kind);
   const w = size;
 
-  // \ud3f0\ud2b8 \ud06c\uae30
+  // 폰트 크기
   const labelFontSize   = Math.round(w * 0.115);
   const contentFontSize = Math.round(w * 0.100);
 
-  // \ub0b4\uc6a9\ubb3c/\ub77c\ubca8 \ucd5c\ub300 \ud3ed\uc5d0 \ub9de\uac8c \uce94\ubc84\uc2a4 \uac00\ub85c \ud655\uc7a5 (\ubc15\uc2a4 \uadf8\ub9bc \ud06c\uae30\ub294 \uadf8\ub300\ub85c)
+  // 내용물/라벨 최대 폭에 맞게 캔버스 가로 확장 (박스 그림 크기는 그대로)
   const contentMaxW = contents.reduce((mx, c) => Math.max(mx, estimateLineWidth(contentLine(c), contentFontSize)), 0);
   const labelW      = estimateLineWidth(v.label, labelFontSize);
-  const canvasW     = Math.max(w, Math.ceil(Math.max(contentMaxW, labelW)) + 16);  // \uc88c\uc6b0 8px \uc5ec\uc720
-  const ox          = (canvasW - w) / 2;  // \ubc15\uc2a4 \uadf8\ub9bc\uc744 \ub113\uc740 \uce94\ubc84\uc2a4 \uac00\uc6b4\ub370\ub85c
+  const canvasW     = Math.max(w, Math.ceil(Math.max(contentMaxW, labelW)) + 16);  // 좌우 8px 여유
+  const ox          = (canvasW - w) / 2;  // 박스 그림을 넓은 캔버스 가운데로
 
-  // \ubc15\uc2a4 \uc544\uc774\uc18c\uba54\ud2b8\ub9ad \uc88c\ud45c (x\ub294 +ox \uc801\uc6a9, bh\ub9cc \uc885\ub958\ubcc4 \ucd95\uc18c)
+  // 박스 아이소메트릭 좌표 (x는 +ox 적용, bh만 종류별 축소)
   const depth = w * 0.22;
   const bx    = w * 0.16 + ox;
-  const by    = w * 0.36;  // 0.26 \u2192 0.36: \uc704 \uc5ec\ubc31 \ud655\ubcf4
+  const by    = w * 0.36;  // 0.26 → 0.36: 위 여백 확보
   const bw    = w * 0.56;
   const bh    = w * 0.50 * heightMult(kind);
 
-  // \ub77c\ubca8\u00b7\ub0b4\uc6a9\ubb3c \ub808\uc774\uc544\uc6c3 (\ubc15\uc2a4 \ud558\ub2e8 \uae30\uc900)
+  // 라벨·내용물 레이아웃 (박스 하단 기준)
   const lineH           = contentFontSize + 5;
   const boxBottom       = by + bh;
   const labelY          = Math.round(boxBottom + w * 0.17);
@@ -78,27 +78,26 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
   return (
     <svg
       viewBox={`0 0 ${canvasW} ${totalH}`}
-      width={canvasW}
-      height={totalH}
+      style={{ width: '100%', height: 'auto', display: 'block', minWidth: 0 }}
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label={v.label}
     >
-      {/* \uc6d4\uba74 */}
+      {/* 윗면 */}
       <polygon
         points={`${bx},${by} ${bx + bw},${by} ${bx + bw + depth},${by - depth} ${bx + depth},${by - depth}`}
         fill={v.top}
         stroke="rgba(20,17,14,0.5)"
         strokeWidth="1"
       />
-      {/* \uce21\uba74 */}
+      {/* 측면 */}
       <polygon
         points={`${bx + bw},${by} ${bx + bw},${by + bh} ${bx + bw + depth},${by + bh - depth} ${bx + bw + depth},${by - depth}`}
         fill={v.side}
         stroke="rgba(20,17,14,0.5)"
         strokeWidth="1"
       />
-      {/* \uc815\uba74 */}
+      {/* 정면 */}
       <rect
         x={bx}
         y={by}
@@ -109,7 +108,7 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
         strokeWidth="1"
         opacity={filled ? 1 : 0.7}
       />
-      {/* \ud14c\uc774\ud504 \ub77c\uc778 (\uaf49 \ucc2c \ubc15\uc2a4 \ud45c\uc2dc) */}
+      {/* 테이프 라인 (꽉 찬 박스 표시) */}
       {filled && (
         <line
           x1={bx + bw / 2}
@@ -121,7 +120,7 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
         />
       )}
 
-      {/* \uc885\ub958 \ub77c\ubca8 */}
+      {/* 종류 라벨 */}
       <text
         x={canvasW / 2}
         y={labelY}
@@ -134,7 +133,7 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
         {v.label}
       </text>
 
-      {/* \ub0b4\uc6a9\ubb3c \ud55c \uc904\uc529 (\uc0ac\uc774\uc988\u00b7\ubbf8\ud130\u00b7\uc778\ubc15\uc2a4\uc885\ub958\u00b7\uc218\ub7c9\u00b7\uc81c\ud488\uc218\ub7c9) */}
+      {/* 내용물 한 줄씩 (사이즈·미터·인박스종류·수량·제품수량) */}
       {contents.map((c, i) => (
         <text
           key={i}
