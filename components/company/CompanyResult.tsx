@@ -176,7 +176,12 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
             <div>마지막 파렛트: {pallet.layers}층 (마지막 층 {pallet.lastLayerBoxes}개, 층당 {pallet.boxesPerLayer})</div>
             {palletSpec && (
               <div style={{ color: '#9C9486' }}>
-                규격: {palletSpec.w}×{palletSpec.d}mm · 높이 {pallet.height}mm
+                규격: {pallet.footprintW}×{pallet.footprintD}mm · 높이 {pallet.height}mm
+                {(pallet.overhangW > 0 || pallet.overhangD > 0) && (
+                  <span style={{ color: '#C77B66' }}>
+                    {' '}(박스 오버행 가로 {pallet.overhangW} / 세로 {pallet.overhangD}mm)
+                  </span>
+                )}
               </div>
             )}
             <div style={{ color: '#DCC08A' }}>

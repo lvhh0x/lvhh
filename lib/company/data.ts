@@ -59,6 +59,11 @@ export const PALLETS: PalletSpec[] = master.pallets.map((p) => ({
   h: p.h,
   tare: p.tare,
   boxesPerLayer: p.boxesPerLayer,
+  layout: {
+    cols: p.layout.cols,
+    rows: p.layout.rows,
+    rotated: p.layout.rotated,
+  },
 }));
 
 // ─── 인박스 종류별 아웃박스/택배박스 단위값 ──────────────────────────────────────

@@ -48,5 +48,10 @@ export function calcPallet(
     totalPallets,
     height,
     weight,
+    // 규격·오버행은 simulate.ts가 calcFootprint 결과로 덮어쓴다 (Phase 5 Step 3/Step 2)
+    footprintW: pallet.w,
+    footprintD: pallet.d,
+    overhangW: 0,
+    overhangD: 0,
   };
 }

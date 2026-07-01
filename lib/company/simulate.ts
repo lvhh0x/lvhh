@@ -15,6 +15,7 @@ import { findProduct, findPallet, getOuterBoxSpec, getInnerBoxSpec } from './dat
 import { decomposeToInnerBoxes, mergeInnerBoxCounts } from './innerbox';
 import { packIntoBoxes, countOuterBoxes } from './outerbox';
 import { calcPallet } from './pallet';
+import { calcFootprint } from './overhang';
 import {
   calcProductWeight,
   calcInnerBoxTare,
@@ -75,7 +76,15 @@ export function simulate(params: CompanyParams): SimulateOutcome {
     if (palletSpec) {
       const stackWeight = productWeight + innerTare + outerTare;
       pallet = calcPallet(outerCount, palletSpec, stackWeight);
-      if (pallet) palletTare = palletSpec.tare * pallet.totalPallets;
+      if (pallet) {
+        palletTare = palletSpec.tare * pallet.totalPallets;
+        // 규격·오버행 (아웃박스 배열 기준) 부착
+        const fp = calcFootprint(palletSpec, getOuterBoxSpec('outer'));
+        pallet.footprintW = fp.footprintW;
+        pallet.footprintD = fp.footprintD;
+        pallet.overhangW = fp.overhangW;
+        pallet.overhangD = fp.overhangD;
+      }
     }
   }
 

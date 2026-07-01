@@ -38,6 +38,13 @@ export interface OuterBoxSpec {
   capacityUnit: number;  // 총 용량 단위 (outer=60, courier=12)
 }
 
+/** 파렛트 위 아웃박스 배열 방식 (Phase 5 Step 3 / Step 2 신규) */
+export interface PalletLayout {
+  cols: number;      // 파렛트 가로(w) 방향 박스 개수
+  rows: number;      // 파렛트 세로(d) 방향 박스 개수
+  rotated: boolean;  // 박스를 90° 회전해 배치하는지 여부
+}
+
 export interface PalletSpec {
   id: string;
   label: string;
@@ -46,6 +53,7 @@ export interface PalletSpec {
   h: number;
   tare: number;          // 공 무게 (kg)
   boxesPerLayer: number; // 층당 아웃박스 수
+  layout: PalletLayout;  // 아웃박스 배열표 (Phase 5 Step 3 / Step 2)
 }
 
 // ─── 입력 ──────────────────────────────────────────────────────────────────────
@@ -98,6 +106,10 @@ export interface PalletStack {
   totalPallets: number;     // 총 파렛트 수
   height: number;           // 파렛트 높이 + 아웃박스 높이 × 단수 (mm)
   weight: number;           // 파렛트 tare + 아웃박스 무게 합 (kg)
+  footprintW: number;       // 파렛트+아웃박스 합산 외곽 가로 (mm) — Phase 5 Step 3/Step 2
+  footprintD: number;       // 파렛트+아웃박스 합산 외곽 세로 (mm)
+  overhangW: number;        // 가로 오버행 (mm, 0이면 없음)
+  overhangD: number;        // 세로 오버행 (mm, 0이면 없음)
 }
 
 // ─── 최종 결과 ─────────────────────────────────────────────────────────────────

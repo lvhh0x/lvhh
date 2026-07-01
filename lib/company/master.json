@@ -36,11 +36,11 @@
   ],
 
   "pallets": [
-    { "id": "700-wood",       "label": "700파렛트 (나무)",   "w": 710,  "d": 750,  "h": 140, "tare": 9.0,  "boxesPerLayer": 4 },
-    { "id": "900-wood",       "label": "900파렛트 (나무)",   "w": 900,  "d": 710,  "h": 140, "tare": 12.4, "boxesPerLayer": 6 },
-    { "id": "1100-wood",      "label": "1100파렛트 (나무)",  "w": 1100, "d": 1100, "h": 190, "tare": 23.3, "boxesPerLayer": 9 },
-    { "id": "1100-plastic-a", "label": "A 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 10.5, "boxesPerLayer": 9 },
-    { "id": "1100-plastic-b", "label": "B 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 18.5, "boxesPerLayer": 9 }
+    { "id": "700-wood",       "label": "700파렛트 (나무)",   "w": 710,  "d": 750,  "h": 140, "tare": 9.0,  "boxesPerLayer": 4, "layout": { "cols": 2, "rows": 2, "rotated": false } },
+    { "id": "900-wood",       "label": "900파렛트 (나무)",   "w": 900,  "d": 710,  "h": 140, "tare": 12.4, "boxesPerLayer": 6, "layout": { "cols": 3, "rows": 2, "rotated": true } },
+    { "id": "1100-wood",      "label": "1100파렛트 (나무)",  "w": 1100, "d": 1100, "h": 190, "tare": 23.3, "boxesPerLayer": 9, "layout": { "cols": 3, "rows": 3, "rotated": false } },
+    { "id": "1100-plastic-a", "label": "A 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 10.5, "boxesPerLayer": 9, "layout": { "cols": 3, "rows": 3, "rotated": false } },
+    { "id": "1100-plastic-b", "label": "B 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 18.5, "boxesPerLayer": 9, "layout": { "cols": 3, "rows": 3, "rotated": false } }
   ],
 
   "innerUnits": {
