@@ -217,6 +217,51 @@
 
 ---
 
+## 🔲 Phase 5 Step 3 — 대대적인 개선 (박스 그리드·파렛트 규격/오버행·원단 타입)
+
+> 상세 설계: `docs/PHASE5-STEP3-PLAN.md` (마스터) + `docs/PHASE5-STEP3-IMPL-PLAN.md` (5단계).
+> 데이터 단일 출처: `lib/company/master.json`. 착수는 사용자 코딩 명령 이후.
+> ⚠️ 미상값: 60인박스 tare / 택배박스 tare = 0 placeholder (사용자 추후 제공 시 master.json 교체).
+
+### Step 3-1 — 박스 그리드 5열 (요구 1)
+- [ ] `CompanyResult.tsx` 박스 그림 컨테이너 flex-wrap → CSS grid (5열)
+- [ ] 하단 정렬 유지 / 텍스트 안 잘림 확인
+- [ ] `npx tsc --noEmit` 통과
+
+### Step 3-2 — 규격·오버행 엔진 신설 (요구 3+4)
+- [ ] 파렛트별 박스 배열표 확정 (700=2×2, 900=3×2, 1100/플라스틱=?)
+- [ ] `lib/company/overhang.ts` 신규 (합산 외곽·오버행 계산)
+- [ ] `weight.ts`/`simulate.ts` 적재무게에 파렛트무게+택배/낱개 반영
+- [ ] `CompanyResult.tsx` 규격 표시 = 파렛트+박스 합산(+오버행)
+- [ ] `types/company.ts` PalletStack footprint/overhang 필드
+- [ ] `npx tsc --noEmit` 통과
+
+### Step 3-3 — 파렛트 슬롯/빈칸/오버 재설계 (요구 2)
+- [ ] `pallet.ts` 재작성: 파렛트 1개 전제 + 슬롯 환산(아웃1/택배1/낱개2=1)
+- [ ] 필요슬롯 > boxesPerLayer×5 → 적재 오버(선택 불가)
+- [ ] 빈칸 배치(아웃→택배→낱개) + 층수/높이 재계산
+- [ ] `CompanyPalletSvg.tsx` 빈칸 위치에 택배/낱개 렌더 (topper 제거)
+- [ ] `CompanyResult.tsx` 적재 오버 경고 표시
+- [ ] `npx tsc --noEmit` 통과
+
+### Step 3-4 — 원단 타입 도입 (요구 5)
+- [ ] `types/company.ts` ProductInput/SizedInnerCount에 `fabric` 추가
+- [ ] `CompanyParams.tsx` 입력 순서: 원단→사이즈→미터→수량 (자유입력 텍스트)
+- [ ] `innerbox.ts` fabric passthrough
+- [ ] `outerbox.ts` 같은 원단 우선 그룹핑 (안 차면 섞어 60) — 개수 규칙 불변
+- [ ] `BoxSvg.tsx`/`CompanyResult.tsx` 원단 표기
+- [ ] `npx tsc --noEmit` 통과
+
+### Step 3-5 — 통합 검증 & 빌드
+- [ ] `scripts/` 회귀 테스트에 신규 케이스 추가(원단/슬롯초과/오버행)
+- [ ] `npx tsc --noEmit` 에러 0
+- [ ] `npm run build` 통과 (폰트 스텁 로컬)
+- [ ] `lvhh.vercel.app/company` 브라우저 5개 항목 확인
+- [ ] `docs/PHASE5-STEP3-VERIFY-LOG.md` 생성
+- [ ] PROGRESS.md / MASTER.md 완료 처리
+
+---
+
 ## 🔲 Phase 6 — DB 연동
 - [ ] `pallet_types` 실제 데이터 확인
 - [ ] `/api/pallets` → Supabase 연결 검증
@@ -266,3 +311,4 @@
 | 2026-06-27 | Phase 5-Step1-E | 실행 화면 (CompanyParams + CompanyResult + /company/[id]) 커밋 c2fb0d4 | Claude Sonnet 4.6 |
 | 2026-06-27 | Phase 5-Step1-F | 검증 로그 + 문서 갱신 | Claude Sonnet 4.6 |
 | 2026-06-28 | Phase 5-Step2 | 마스터 JSON 분리 + outerbox 재작성 + SizedInnerCount UI 연결 + 18/18 검증 | Claude Sonnet 4.6 |
+| 2026-07-01 | Phase 5-Step3 계획 | 대대적 개선 계획 수립 + 문서화 (PHASE5-STEP3-PLAN.md, PHASE5-STEP3-IMPL-PLAN.md) — 구현 대기 | Claude Opus 4.8 |
