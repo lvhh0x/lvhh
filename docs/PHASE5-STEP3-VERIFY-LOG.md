@@ -47,7 +47,7 @@ npx tsc --noEmit    → 에러 0 (exit 0)
 
 - 원인: `BoxSvg.tsx`의 SVG가 `width={canvasW}` 고정 픽셀 속성을 사용하는데, `canvasW`는 내용물 텍스트 라벨 길이에 따라 120px보다 커질 수 있음.
 - `gridTemplateColumns: 'repeat(5, 1fr)'`는 `minmax(auto, 1fr)`와 동일하게 동작해 각 칸이 콘텐츠의 최소(content-based) 폭보다 작아지지 못함.
-- 텍스트가 긴 박스가 하나라도 있으면 그 칸이 넓어지고, 5칸 합이 카드 폭을 넘으면 grid는 flex-wrap과 달리 줄바꿈 없이 그대로 넘쳐버림.
+- 텍스트가 긴 박스가 하나라도 있으면 그 칸이 넓어지고, 5칸 합이 카드 폭을 넘으면 grid는 flex-wrap과 달리 줄바꿈 없이 그대로 넘쳤버림.
 
 ### 5. 수정 (2차)
 
@@ -73,3 +73,77 @@ npx tsc --noEmit    → 에러 0 (exit 0)
 | `npx tsc --noEmit` 통과 | ✅ 완료 (에러 0) |
 
 **Step 3-1 완료.**
+
+---
+
+## Step 2 — 규격·오버행 엔진 신설 (요구 3+4)
+
+> 검증일: 2026-07-02 · 상세 설계: `docs/PHASE5-STEP3-STEP2-IMPL.md`
+> 사용자 확정: 파렛트 배열표(700=2×2 / 900=3×2 회전 / 1100·플라스틱=3×3), 오버행은 아웃박스만 기준, 배열표는 master.json 하드코딩(Phase 6 DB 이관 전제).
+
+### 1. 변경 파일 (수정 6 + 신규 3)
+
+| 파일 | 성격 | 변경 |
+|------|------|------|
+| `lib/company/master.json` | 데이터 | 각 pallet에 `layout {cols,rows,rotated}` 추가 |
+| `types/company.ts` | 타입 | `PalletLayout` 신규, `PalletSpec.layout`, `PalletStack`에 `footprintW/D`·`overhangW/D` |
+| `lib/company/data.ts` | 매핑 | `layout` 필드 매핑 |
+| `lib/company/overhang.ts` | **엔진 신규** | `calcFootprint(pallet, outerBox)` — 규격·오버행 순수 함수 |
+| `lib/company/pallet.ts` | 엔진 | `PalletStack` 반환에 footprint/overhang 기본값(파렛트 원치수·0) 추가 |
+| `lib/company/simulate.ts` | 엔진 | `calcFootprint` 호출해 PalletStack에 규격·오버행 부착 |
+| `components/company/CompanyResult.tsx` | 프론트 | 규격 표시를 `footprintW×footprintD` + 오버행 문구로 교체 |
+| `docs/PHASE5-STEP3-STEP2-IMPL.md` | 문서 | Step 2 상세 구현계획 |
+| `scripts/test-step3-2.ts` | 검증 | 규격·오버행 엔진 테스트 |
+
+### 2. 무게 보정 재점검 결과 — weight.ts 변경 없음
+
+IMPL-PLAN Step 2 설계에는 "적재 무게에 택배/낱개 제품무게 누락" 우려가 적혀 있었으나,
+현행 `simulate.ts`의 `stackWeight = productWeight + innerTare + outerTare`에서 `productWeight`는
+**입력 전체(`validInputs`) 기준 합**이라 택배/낱개 제품무게를 이미 포함하고 있음을 확인.
+→ **누락 아님. weight.ts 로직 변경 불필요**(지침 3 외과적 수정 — 불필요한 변경 배제).
+파렛트 자체 무게(palletTare)는 `totalWeight`에 이미 반영(유지).
+
+### 3. 파렛트별 배열표 (사용자 확정 · master.json 하드코딩)
+
+| pallet | 규격(w×d) | bpl | layout | 배열총폭 | footprint | overhang(w,d) |
+|---|---|---|---|---|---|---|
+| 700-wood | 710×750 | 4 | 2×2 무회전 | 710×630 | 710×750 | 0, 0 |
+| 900-wood | 900×710 | 6 | 3×2 90°회전 | 945×710 | 945×710 | **45**, 0 |
+| 1100-wood | 1100×1100 | 9 | 3×3 무회전 | 1065×945 | 1100×1100 | 0, 0 |
+| 1100-plastic-a | 1100×1100 | 9 | 3×3 무회전 | 1065×945 | 1100×1100 | 0, 0 |
+| 1100-plastic-b | 1100×1100 | 9 | 3×3 무회전 | 1065×945 | 1100×1100 | 0, 0 |
+
+### 4. 검증 결과
+
+```
+[신규] scripts/test-step3-2.ts (규격·오버행 엔진)
+  아웃박스 규격: 355 × 315 mm
+  PASS [700-wood]        배열총폭 710×630  → footprint 710×750  / overhang 0,0
+  PASS [900-wood]        배열총폭 945×710  → footprint 945×710  / overhang 45,0
+  PASS [1100-wood]       배열총폭 1065×945 → footprint 1100×1100 / overhang 0,0
+  PASS [1100-plastic-a]  배열총폭 1065×945 → footprint 1100×1100 / overhang 0,0
+  PASS [1100-plastic-b]  배열총폭 1065×945 → footprint 1100×1100 / overhang 0,0
+  결과: 5/5 통과
+
+  불변식 확인:
+   · 모든 파렛트 cols × rows == boxesPerLayer ✓
+   · footprintW == max(pallet.w, arrW), overhangW == max(0, arrW − pallet.w) ✓ (D도 동일)
+
+[회귀] scripts/test-step4.ts (기존 19케이스) → 19/19 통과 (무영향 확인)
+```
+
+### 5. 빌드/타입체크
+
+```
+npx tsc --noEmit         → 에러 0 (exit 0)
+npm run build            → Compiled successfully (폰트 스텁 로컬 임시, 원복 완료 — push 안 함)
+```
+
+### 6. 미해결/이월 (Step 3에서 처리)
+
+- 파렛트 슬롯 환산 / 빈칸 배치 / 적재 오버 판정 → **Step 3**.
+- 단일 파렛트 전제 pallet.ts 재작성, 슬롯 기반 높이/층수 재계산 → **Step 3**.
+  (Step 2는 현행 pallet.ts 층수·높이를 그대로 사용. footprint/overhang만 신규 반영.)
+- CompanyPalletSvg 빈칸 렌더 → **Step 3**.
+
+**Step 3-2(규격·오버행 엔진) 완료.** (브라우저 육안 확인은 Step 3 통합 검증에서 함께 수행 예정)
