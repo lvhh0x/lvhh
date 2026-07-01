@@ -223,10 +223,11 @@
 > 데이터 단일 출처: `lib/company/master.json`. 착수는 사용자 코딩 명령 이후.
 > ⚠️ 미상값: 60인박스 tare / 택배박스 tare = 0 placeholder (사용자 추후 제공 시 master.json 교체).
 
-### Step 3-1 — 박스 그리드 5열 (요구 1)
-- [ ] `CompanyResult.tsx` 박스 그림 컨테이너 flex-wrap → CSS grid (5열)
-- [ ] 하단 정렬 유지 / 텍스트 안 잘림 확인
-- [ ] `npx tsc --noEmit` 통과
+### Step 3-1 — 박스 그리드 5열 (요구 1) ✅ — 커밋 `3523124`, `9e74caf`
+- [x] `CompanyResult.tsx` 박스 그림 컨테이너 flex-wrap → CSS grid (5열, `minmax(0,1fr)`)
+- [x] 하단 정렬 유지 / 텍스트 안 잘림 확인 (Chrome 실브라우저 검증)
+- [x] `npx tsc --noEmit` 통과
+- [x] (버그 수정) 카드 테두리 오버플로우 발견 → `BoxSvg.tsx` SVG 반응형 스케일링으로 해결
 
 ### Step 3-2 — 규격·오버행 엔진 신설 (요구 3+4)
 - [ ] 파렛트별 박스 배열표 확정 (700=2×2, 900=3×2, 1100/플라스틱=?)
@@ -249,7 +250,7 @@
 - [ ] `CompanyParams.tsx` 입력 순서: 원단→사이즈→미터→수량 (자유입력 텍스트)
 - [ ] `innerbox.ts` fabric passthrough
 - [ ] `outerbox.ts` 같은 원단 우선 그룹핑 (안 차면 섞어 60) — 개수 규칙 불변
-- [ ] `BoxSvg.tsx`/`CompanyResult.tsx` 원단 표기
+- [ ] `BoxSvg.tsx`/`CompanyResult.tsx` 원단 표기 (형식: "B220 아웃박스" — 사용자 확정, 2026-07-01)
 - [ ] `npx tsc --noEmit` 통과
 
 ### Step 3-5 — 통합 검증 & 빌드
@@ -312,3 +313,4 @@
 | 2026-06-27 | Phase 5-Step1-F | 검증 로그 + 문서 갱신 | Claude Sonnet 4.6 |
 | 2026-06-28 | Phase 5-Step2 | 마스터 JSON 분리 + outerbox 재작성 + SizedInnerCount UI 연결 + 18/18 검증 | Claude Sonnet 4.6 |
 | 2026-07-01 | Phase 5-Step3 계획 | 대대적 개선 계획 수립 + 문서화 (PHASE5-STEP3-PLAN.md, PHASE5-STEP3-IMPL-PLAN.md) — 구현 대기 | Claude Opus 4.8 |
+| 2026-07-01 | Phase 5-Step3-1 | 박스 그리드 5열 (grid minmax + BoxSvg 반응형) 커밋 3523124, 9e74caf — Chrome 실브라우저 검증 완료 | Claude Sonnet 4.6 |
