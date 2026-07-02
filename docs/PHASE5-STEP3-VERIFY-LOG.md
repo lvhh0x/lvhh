@@ -47,7 +47,7 @@ npx tsc --noEmit    → 에러 0 (exit 0)
 
 - 원인: `BoxSvg.tsx`의 SVG가 `width={canvasW}` 고정 픽셀 속성을 사용하는데, `canvasW`는 내용물 텍스트 라벨 길이에 따라 120px보다 커질 수 있음.
 - `gridTemplateColumns: 'repeat(5, 1fr)'`는 `minmax(auto, 1fr)`와 동일하게 동작해 각 칸이 콘텐츠의 최소(content-based) 폭보다 작아지지 못함.
-- 텍스트가 긴 박스가 하나라도 있으면 그 칸이 넓어지고, 5칸 합이 카드 폭을 넘으면 grid는 flex-wrap과 달리 줄바꿈 없이 그대로 넘쳤버림.
+- 텍스트가 긴 박스가 하나라도 있으면 그 칸이 넓어지고, 5칸 합이 카드 폭을 넘으면 grid는 flex-wrap과 달리 줄바꿈 없이 그대로 넘쳐버림.
 
 ### 5. 수정 (2차)
 
@@ -147,3 +147,78 @@ npm run build            → Compiled successfully (폰트 스텁 로컬 임시,
 - CompanyPalletSvg 빈칸 렌더 → **Step 3**.
 
 **Step 3-2(규격·오버행 엔진) 완료.** (브라우저 육안 확인은 Step 3 통합 검증에서 함께 수행 예정)
+
+---
+
+## Step 3-3 — 파렛트 슬롯·빈칸·오버플로우 재설계 (요구 2)
+
+> **검증일:** 2026-07-02 · 로컬 클론 → 엔진/프론트 수정 → tsc → 검증 스크립트 → 빌드
+> 상세 설계·계획: `docs/PHASE5-STEP3-STEP3-IMPL.md`
+
+### 1. 변경 파일
+
+| 파일 | 계층 | 변경 |
+|---|---|---|
+| `types/company.ts` | 타입 | `PalletStack` 슬롯·overflow 필드 개편(`totalPallets`/`lastLayerBoxes` 제거), `SlotKind` 추가 |
+| `lib/company/pallet.ts` | 엔진 | 재작성 — 파렛트 1개 전제, 슬롯 환산, overflow, 층수/높이, `slotKindAt` 헬퍼 |
+| `lib/company/simulate.ts` | 엔진 | `calcPallet`에 3-카운트 전달, `palletTare` 1개 기준 |
+| `components/company/CompanyPalletSvg.tsx` | 프론트 | topper 제거 → 빈칸 슬롯 위치에 택배/낱개 렌더, 다중 파렛트 텍스트 제거 |
+| `components/company/CompanyResult.tsx` | 프론트 | overflow 경고, `totalPallets` 라인 제거, `lastLayerSlots` 반영 |
+
+- `master.json`·`weight.ts` **변경 없음**(규격·무게 고정 원칙). overflow 신호는 사용자 확정대로 `PalletStack.overflow` 단일 필드.
+
+### 2. 확정 규칙 (사용자 확정 2026-07-02)
+
+- 필요슬롯 = `아웃 + 택배 + ceil(낱개/2)`, 최대슬롯 = `boxesPerLayer × 5`, 판정 `필요 > 최대 → 초과`(경계값 OK)
+- 층수 = `ceil(필요슬롯 / boxesPerLayer)`, 높이 = `파렛트높이 + 315 × 층수`
+- 배치 순서: 아웃 → 택배(1칸) → 낱개(2개=1칸)
+
+### 3. 검증 스크립트
+
+`scripts/test-step3-3.ts` — `calcPallet` / `slotKindAt` 단정. 실행:
+```
+TS_NODE_BASEURL=. npx ts-node -r tsconfig-paths/register \
+  --compiler-options '{"module":"commonjs","baseUrl":"."}' scripts/test-step3-3.ts
+```
+(ts-node/tsconfig-paths는 devDep 아님 → npx 실행, package.json 오염 없음. baseUrl은 env로 주입해 프로젝트 tsconfig 무수정.)
+
+### 4. 검증 결과
+
+```
+[신규] scripts/test-step3-3.ts → PASS 80 · FAIL 0
+
+ S1 700 아웃20        → 필요20 · overflow=false (경계 OK)
+ S2 700 아웃21        → overflow=true (21>20)
+ S3 900 아웃30        → 필요30 · overflow=false
+ S4 900 아웃31        → overflow=true (31>30)
+ S5 700 아웃18+택배2  → 필요20 · 층수5 · 마지막층4칸 · 높이1715 · overflow=false
+ S6 700 아웃18+택배5  → 필요23 · overflow=true (23>20)
+ S7 700 낱개3         → slotLoose=ceil(3/2)=2 · 필요2
+ S8 700 아웃16+택배2+낱개3 → 필요20 · overflow=false
+ S9 1100 아웃45       → 필요45 · overflow=false (경계 OK)
+ S9b 1100 아웃46      → overflow=true (46>45)
+
+ slotKindAt(아웃16·택배2·낱개2):
+   slot[0..15]=outer · slot[16,17]=courier · slot[18,19]=loose · slot[20]=empty ✓
+
+ 불변식(전 케이스): needed=합 · maxSlots=bpl×5 · layers=ceil · height=h+315×층수 · weight=tare ✓
+
+[회귀] scripts/test-step4.ts (박스 패킹 19케이스) → 19/19 통과 (무영향)
+[회귀] scripts/test-step3-2.ts (규격·오버행 5케이스) → 5/5 통과 (무영향)
+```
+
+### 5. 빌드/타입체크/가드
+
+```
+npx tsc --noEmit                     → 에러 0 (exit 0)
+node scripts/check-jsx-escapes.mjs   → OK (JSX 텍스트 이스케이프 0)
+npm run build                        → ✓ Compiled successfully / 9개 페이지 생성
+                                       (폰트 스텁 로컬 임시, 원복 완료 — push 안 함)
+```
+
+### 6. 잔여
+
+- 브라우저 육안(SVG 빈칸 슬롯 렌더·overflow 경고)은 push 후 `lvhh.vercel.app/company` 통합 확인(Step 3-5).
+- Step 3-4(원단 타입)·Step 3-5(통합 검증) 미착수.
+
+**Step 3-3 완료.**

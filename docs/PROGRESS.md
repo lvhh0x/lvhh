@@ -239,13 +239,13 @@
 - [x] 검증 `scripts/test-step3-2.ts` 5/5 통과 + 회귀 test-step4 19/19 통과
 - [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬, 원복)
 
-### Step 3-3 — 파렛트 슬롯/빈칸/오버 재설계 (요구 2)
-- [ ] `pallet.ts` 재작성: 파렛트 1개 전제 + 슬롯 환산(아웃1/택배1/낱개2=1)
-- [ ] 필요슬롯 > boxesPerLayer×5 → 적재 오버(선택 불가)
-- [ ] 빈칸 배치(아웃→택배→낱개) + 층수/높이 재계산
-- [ ] `CompanyPalletSvg.tsx` 빈칸 위치에 택배/낱개 렌더 (topper 제거)
-- [ ] `CompanyResult.tsx` 적재 오버 경고 표시
-- [ ] `npx tsc --noEmit` 통과
+### Step 3-3 — 파렛트 슬롯/빈칸/오버 재설계 (요구 2) ✅ — 상세 `docs/PHASE5-STEP3-STEP3-IMPL.md`, 검증 `docs/PHASE5-STEP3-VERIFY-LOG.md`
+- [x] `pallet.ts` 재작성: 파렛트 1개 전제 + 슬롯 환산(아웃1/택배1/낱개2=1)
+- [x] 필요슬롯 > boxesPerLayer×5 → 적재 오버(선택 불가) — overflow 신호는 `PalletStack.overflow` 단일 필드(사용자 확정 A)
+- [x] 빈칸 배치(아웃→택배→낱개) + 층수/높이 재계산
+- [x] `CompanyPalletSvg.tsx` 빈칸 위치에 택배/낱개 렌더 (topper 제거)
+- [x] `CompanyResult.tsx` 적재 오버 경고 표시
+- [x] `npx tsc --noEmit` 통과 (+ 검증 스크립트 80/80, 회귀 24케이스 통과, 빌드 성공)
 
 ### Step 3-4 — 원단 타입 도입 (요구 5)
 - [ ] `types/company.ts` ProductInput/SizedInnerCount에 `fabric` 추가
@@ -317,3 +317,4 @@
 | 2026-07-01 | Phase 5-Step3 계획 | 대대적 개선 계획 수립 + 문서화 (PHASE5-STEP3-PLAN.md, PHASE5-STEP3-IMPL-PLAN.md) — 구현 대기 | Claude Opus 4.8 |
 | 2026-07-01 | Phase 5-Step3-1 | 박스 그리드 5열 (grid minmax + BoxSvg 반응형) 커밋 3523124, 9e74caf — Chrome 실브라우저 검증 완료 | Claude Sonnet 4.6 |
 | 2026-07-02 | Phase 5-Step3-2 | 규격·오버행 엔진 신설 (overhang.ts + master.json layout + PalletStack footprint/overhang), 배열표 확정(700=2×2/900=3×2회전/1100·플라스틱=3×3), 검증 5/5 + 회귀 19/19 | Claude Opus 4.8 |
+| 2026-07-02 | Phase 5-Step3-3 | 파렛트 슬롯·빈칸·오버플로우 재설계 (pallet.ts 재작성 + PalletStack 슬롯 필드 + SlotKind + CompanyPalletSvg 슬롯 렌더 + overflow 경고), 검증 80/80 + 회귀 24 | Claude Opus 4.8 |
