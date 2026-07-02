@@ -229,13 +229,15 @@
 - [x] `npx tsc --noEmit` 통과
 - [x] (버그 수정) 카드 테두리 오버플로우 발견 → `BoxSvg.tsx` SVG 반응형 스케일링으로 해결
 
-### Step 3-2 — 규격·오버행 엔진 신설 (요구 3+4)
-- [ ] 파렛트별 박스 배열표 확정 (700=2×2, 900=3×2, 1100/플라스틱=?)
-- [ ] `lib/company/overhang.ts` 신규 (합산 외곽·오버행 계산)
-- [ ] `weight.ts`/`simulate.ts` 적재무게에 파렛트무게+택배/낱개 반영
-- [ ] `CompanyResult.tsx` 규격 표시 = 파렛트+박스 합산(+오버행)
-- [ ] `types/company.ts` PalletStack footprint/overhang 필드
-- [ ] `npx tsc --noEmit` 통과
+### Step 3-2 — 규격·오버행 엔진 신설 (요구 3+4) ✅ — 상세 `docs/PHASE5-STEP3-STEP2-IMPL.md`
+- [x] 파렛트별 박스 배열표 확정 (700=2×2, 900=3×2 회전, 1100/플라스틱=3×3) — 사용자 확정 2026-07-02
+- [x] `lib/company/overhang.ts` 신규 (`calcFootprint` — 합산 외곽·오버행 계산)
+- [x] `weight.ts`/`simulate.ts` 적재무게 재점검 → productWeight가 이미 전체(택배/낱개) 포함 확인, weight.ts 변경 불필요
+- [x] `CompanyResult.tsx` 규격 표시 = 파렛트+박스 합산(+오버행 문구)
+- [x] `types/company.ts` PalletLayout + PalletStack footprint/overhang 필드
+- [x] master.json 각 pallet에 `layout {cols,rows,rotated}` 하드코딩 (Phase 6 DB 이관 전제)
+- [x] 검증 `scripts/test-step3-2.ts` 5/5 통과 + 회귀 test-step4 19/19 통과
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬, 원복)
 
 ### Step 3-3 — 파렛트 슬롯/빈칸/오버 재설계 (요구 2)
 - [ ] `pallet.ts` 재작성: 파렛트 1개 전제 + 슬롯 환산(아웃1/택배1/낱개2=1)
@@ -314,3 +316,4 @@
 | 2026-06-28 | Phase 5-Step2 | 마스터 JSON 분리 + outerbox 재작성 + SizedInnerCount UI 연결 + 18/18 검증 | Claude Sonnet 4.6 |
 | 2026-07-01 | Phase 5-Step3 계획 | 대대적 개선 계획 수립 + 문서화 (PHASE5-STEP3-PLAN.md, PHASE5-STEP3-IMPL-PLAN.md) — 구현 대기 | Claude Opus 4.8 |
 | 2026-07-01 | Phase 5-Step3-1 | 박스 그리드 5열 (grid minmax + BoxSvg 반응형) 커밋 3523124, 9e74caf — Chrome 실브라우저 검증 완료 | Claude Sonnet 4.6 |
+| 2026-07-02 | Phase 5-Step3-2 | 규격·오버행 엔진 신설 (overhang.ts + master.json layout + PalletStack footprint/overhang), 배열표 확정(700=2×2/900=3×2회전/1100·플라스틱=3×3), 검증 5/5 + 회귀 19/19 | Claude Opus 4.8 |
