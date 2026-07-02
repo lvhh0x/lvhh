@@ -98,14 +98,23 @@ export interface PackedBox {
 
 // ─── 파렛트 결과 ───────────────────────────────────────────────────────────────
 
+/** 파렛트 슬롯 한 칸의 종류 (Phase 5 Step 3-3) */
+export type SlotKind = 'outer' | 'courier' | 'loose' | 'empty';
+
+// 파렛트는 항상 1개 (Phase 5 Step 3-3 — 슬롯 환산 재설계)
 export interface PalletStack {
   palletId: string;
-  layers: number;           // 마지막 파렛트 단수
-  lastLayerBoxes: number;   // 마지막 층 박스 수
-  boxesPerLayer: number;    // 파렛트 층당 박스 수
-  totalPallets: number;     // 총 파렛트 수
-  height: number;           // 파렛트 높이 + 아웃박스 높이 × 단수 (mm)
-  weight: number;           // 파렛트 tare + 아웃박스 무게 합 (kg)
+  boxesPerLayer: number;    // 층당 슬롯 수 (= layout cols×rows)
+  neededSlots: number;      // 필요슬롯 = slotOuter + slotCourier + slotLoose
+  maxSlots: number;         // 최대슬롯 = boxesPerLayer × 5
+  overflow: boolean;        // 필요슬롯 > 최대슬롯 → 적재 초과 (선택 불가)
+  slotOuter: number;        // 아웃박스가 차지하는 슬롯 (= outerCount)
+  slotCourier: number;      // 택배가 차지하는 슬롯 (= courierCount)
+  slotLoose: number;        // 낱개가 차지하는 슬롯 (= ceil(looseCount / 2))
+  layers: number;           // 층수 = ceil(필요슬롯 / boxesPerLayer)
+  lastLayerSlots: number;   // 마지막(맨 위) 층이 실제 차지한 슬롯 수
+  height: number;           // 파렛트 높이 + 아웃박스 높이(315) × 층수 (mm)
+  weight: number;           // 파렛트 tare + 적재물 무게 합 (kg)
   footprintW: number;       // 파렛트+아웃박스 합산 외곽 가로 (mm) — Phase 5 Step 3/Step 2
   footprintD: number;       // 파렛트+아웃박스 합산 외곽 세로 (mm)
   overhangW: number;        // 가로 오버행 (mm, 0이면 없음)

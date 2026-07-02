@@ -149,18 +149,32 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
         )}
       </div>
 
-      {/* [2] 파렛트 결과 */}
-      {pallet && (
+      {/* [2] 파렛트 결과 — 적재 초과 시 경고만 표시 */}
+      {pallet && pallet.overflow && (
+        <div style={card}>
+          <div style={sectionLabel}>[2] 파렛트 적재</div>
+          <div style={{ color: '#C77B66', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
+            적재 초과 — 이 파렛트는 선택할 수 없습니다
+          </div>
+          <div
+            style={{
+              fontFamily: 'var(--font-jetbrains-mono), monospace',
+              fontSize: '12px',
+              color: '#9C9486',
+            }}
+          >
+            필요 {pallet.neededSlots}슬롯 / 최대 {pallet.maxSlots}슬롯
+          </div>
+        </div>
+      )}
+
+      {/* [2] 파렛트 결과 — 적재 가능 */}
+      {pallet && !pallet.overflow && (
         <div style={card}>
           <div style={sectionLabel}>[2] 파렛트 적재</div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
-            <CompanyPalletSvg
-              stack={pallet}
-              courierCount={result.courierCount}
-              looseCount={result.looseCount}
-              width={320}
-            />
+            <CompanyPalletSvg stack={pallet} width={320} />
           </div>
 
           {/* 파렛트 텍스트 정보 */}
@@ -172,8 +186,7 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
               lineHeight: 1.8,
             }}
           >
-            <div>총 파렛트: {pallet.totalPallets}개</div>
-            <div>마지막 파렛트: {pallet.layers}층 (마지막 층 {pallet.lastLayerBoxes}개, 층당 {pallet.boxesPerLayer})</div>
+            <div>적재: {pallet.layers}층 (마지막 층 {pallet.lastLayerSlots}칸, 층당 {pallet.boxesPerLayer})</div>
             {palletSpec && (
               <div style={{ color: '#9C9486' }}>
                 규격: {pallet.footprintW}×{pallet.footprintD}mm · 높이 {pallet.height}mm

@@ -1,32 +1,34 @@
-// \ud30c\ub808\ud2b8 \uc801\uc7ac \ud615\uc0c1 \uadf8\ub9bc (Phase 5 Step 2 \uac1c\uc120)
-// \ubcc0\uacbd: \u2460 \ub9c8\uc9c0\ub9c9 \uce35 \ube48\uc790\ub9ac(empty slot)\ub97c \uc810\uc120 outline\uc73c\ub85c \uc2dc\uac01\ud654
-//       \u2461 totalPallets > 1\uc77c \ub54c \uc0c1\ub2e8\uc5d0 "\ub9cc\uc7ac N\uac1c \ud3ec\ud568 \u00b7 \uc804 N\uac1c" \uc548\ub0b4 \ud14d\uc2a4\ud2b8 \ucd94\uac00
+// 파렛트 적재 형상 그림 (Phase 5 Step 3-3 대수정)
+// 변경: ① 파렛트 1개 전제 — 다중 파렛트 안내 텍스트 제거
+//       ② 상단 topper(별도 줄) 제거 → 택배/낱개를 실제 빈칸 슬롯 위치에 렌더
+//          (아웃=금색, 택배=초록, 낱개=회색, 진짜 빈칸=점선)
+//       ③ 슬롯 종류는 엔진 slotKindAt(전역 슬롯 index)로 판정
 
 import type { PalletStack } from '@/types/company';
 import { findPallet } from '@/lib/company/data';
+import { slotKindAt } from '@/lib/company/pallet';
 
 interface Props {
   stack: PalletStack;
-  courierCount: number;
-  looseCount: number;
   width?: number;
 }
 
-export default function CompanyPalletSvg({
-  stack,
-  courierCount,
-  looseCount,
-  width = 320,
-}: Props) {
+// 슬롯 종류별 채움색
+const FILL: Record<'outer' | 'courier' | 'loose', string> = {
+  outer: '#C9A86A',   // 아웃박스 (금색)
+  courier: '#8FBFA0', // 택배박스 (초록)
+  loose: '#9C9486',   // 낱개 (회색)
+};
+
+export default function CompanyPalletSvg({ stack, width = 320 }: Props) {
   const pallet = findPallet(stack.palletId);
   const label = pallet?.label ?? stack.palletId;
 
   const bpl            = stack.boxesPerLayer;
   const layers         = stack.layers;
-  const lastLayerBoxes = stack.lastLayerBoxes;
-  const totalPallets   = stack.totalPallets;
+  const lastLayerSlots = stack.lastLayerSlots;
 
-  // \ub808\uc774\uc544\uc6c3 \uacc4\uc0b0
+  // 레이아웃 계산
   const W      = width;
   const padX   = W * 0.08;
   const innerW = W - padX * 2;
@@ -35,28 +37,23 @@ export default function CompanyPalletSvg({
   const boxH   = boxW * 0.62;
   const palletH = 16;
 
-  // \uc0c1\ub2e8 \uc5ec\ubc31: \ud0dd\ubc30/\ub099\uac1c \ud1a0\ud37c + (totalPallets>1\uc77c \ub54c \ucd94\uac00 \ud14d\uc2a4\ud2b8)
-  const hasMultiPallets = totalPallets > 1;
-  const multiPalletLineH = 14;
-  const topPad = 26 + (hasMultiPallets ? multiPalletLineH : 0);
-
+  const topPad = 14;
   const stackH = layers * (boxH + boxGap);
   const H      = topPad + stackH + palletH + 40;
 
-  // y \uae30\uc900: \ud30c\ub808\ud2b8 \uc67c\uba74 = baseY
+  // y 기준: 파렛트 윗면 = baseY
   const baseY = topPad + stackH;
 
-  // \uce35 \uadf8\ub9ac\uae30 (\uc544\ub798\u2192\uc704)
+  // 층 그리기 (아래→위). 전역 슬롯 index = layer*bpl + i.
   const rows = [];
   for (let layer = 0; layer < layers; layer++) {
-    const isTop       = layer === layers - 1;
-    const filledCount = isTop ? lastLayerBoxes : bpl;
     const y = baseY - (layer + 1) * (boxH + boxGap) + boxGap;
-
     const layerBoxes = [];
+
     for (let i = 0; i < bpl; i++) {
-      const x        = padX + i * (boxW + boxGap);
-      const isFilled = i < filledCount;
+      const x    = padX + i * (boxW + boxGap);
+      const kind = slotKindAt(layer * bpl + i, stack);
+      const isEmpty = kind === 'empty';
 
       layerBoxes.push(
         <rect
@@ -65,18 +62,19 @@ export default function CompanyPalletSvg({
           y={y}
           width={boxW}
           height={boxH}
-          fill={isFilled ? '#C9A86A' : 'none'}
-          stroke={isFilled ? 'rgba(20,17,14,0.5)' : 'rgba(201,168,106,0.28)'}
+          fill={isEmpty ? 'none' : FILL[kind]}
+          stroke={isEmpty ? 'rgba(201,168,106,0.28)' : 'rgba(20,17,14,0.5)'}
           strokeWidth="1"
-          strokeDasharray={isFilled ? undefined : '3 2'}
+          strokeDasharray={isEmpty ? '3 2' : undefined}
           rx="1.5"
         />,
       );
 
-      if (isFilled) {
+      // 아웃박스만 가운데 분할선(장식) 유지
+      if (kind === 'outer') {
         layerBoxes.push(
           <line
-            key={`t${i}`}
+            key={`d${i}`}
             x1={x + boxW / 2}
             y1={y}
             x2={x + boxW / 2}
@@ -90,43 +88,6 @@ export default function CompanyPalletSvg({
     rows.push(<g key={layer}>{layerBoxes}</g>);
   }
 
-  // \ud0dd\ubc30/\ub099\uac1c \ud1a0\ud37c (\ub9e8 \uc704\uc5d0 \uc791\uac8c \uc5b7\uc74c)
-  const topperY = topPad - 18;
-  const toppers = [];
-  let tx = padX;
-  for (let i = 0; i < courierCount; i++) {
-    toppers.push(
-      <rect
-        key={`c${i}`}
-        x={tx}
-        y={topperY}
-        width={boxW * 0.7}
-        height={14}
-        fill="#8FBFA0"
-        stroke="rgba(20,17,14,0.5)"
-        strokeWidth="1"
-        rx="1.5"
-      />,
-    );
-    tx += boxW * 0.7 + 3;
-  }
-  for (let i = 0; i < looseCount; i++) {
-    toppers.push(
-      <rect
-        key={`l${i}`}
-        x={tx}
-        y={topperY}
-        width={boxW * 0.55}
-        height={14}
-        fill="#9C9486"
-        stroke="rgba(20,17,14,0.5)"
-        strokeWidth="1"
-        rx="1.5"
-      />,
-    );
-    tx += boxW * 0.55 + 3;
-  }
-
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -134,29 +95,12 @@ export default function CompanyPalletSvg({
       height={H}
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label={`${label} \uc801\uc7ac \ud615\uc0c1`}
+      aria-label={`${label} 적재 형상`}
     >
-      {/* \ub9cc\uc7ac \ud30c\ub808\ud2b8 \uc548\ub0b4 (totalPallets > 1) */}
-      {hasMultiPallets && (
-        <text
-          x={W / 2}
-          y={topPad - 26 + 11}
-          textAnchor="middle"
-          fontFamily="var(--font-jetbrains-mono), monospace"
-          fontSize="10"
-          fill="#8c7a55"
-        >
-          {`\ub9cc\uc7ac \ud30c\ub808\ud2b8 ${totalPallets - 1}\uac1c + \uc544\ub798 \ud30c\ub808\ud2b8 = \uc804 ${totalPallets}\uac1c`}
-        </text>
-      )}
-
-      {/* \ud0dd\ubc30/\ub099\uac1c \ud1a0\ud37c */}
-      {toppers}
-
-      {/* \uc801\uc7ac \ubc15\uc2a4 \uce35 */}
+      {/* 적재 박스 층 */}
       {rows}
 
-      {/* \ud30c\ub808\ud2b8 \ubcf8\uccb4 */}
+      {/* 파렛트 본체 */}
       <rect
         x={padX - 6}
         y={baseY}
@@ -167,12 +111,12 @@ export default function CompanyPalletSvg({
         strokeWidth="1"
         rx="1"
       />
-      {/* \ud30c\ub808\ud2b8 \ub2e4\ub9ac */}
+      {/* 파렛트 다리 */}
       <rect x={padX - 6}              y={baseY + palletH} width={10} height={8} fill="#4A3C28" />
       <rect x={padX + innerW / 2 - 4} y={baseY + palletH} width={10} height={8} fill="#4A3C28" />
       <rect x={padX + innerW - 4}     y={baseY + palletH} width={10} height={8} fill="#4A3C28" />
 
-      {/* \ub77c\ubca8 */}
+      {/* 라벨 */}
       <text
         x={W / 2}
         y={H - 14}
@@ -191,7 +135,7 @@ export default function CompanyPalletSvg({
         fontSize="9.5"
         fill="#9C9486"
       >
-        {`${layers}\uce35 \u00b7 \ub9c8\uc9c0\ub9c9\uce35 ${lastLayerBoxes}\uac1c \u00b7 \uce35\ub2f9 ${bpl}`}
+        {`${layers}층 · 마지막층 ${lastLayerSlots}칸 · 층당 ${bpl}`}
       </text>
     </svg>
   );

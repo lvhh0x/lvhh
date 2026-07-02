@@ -75,9 +75,9 @@ export function simulate(params: CompanyParams): SimulateOutcome {
     const palletSpec = findPallet(params.palletId);
     if (palletSpec) {
       const stackWeight = productWeight + innerTare + outerTare;
-      pallet = calcPallet(outerCount, palletSpec, stackWeight);
+      pallet = calcPallet({ outerCount, courierCount, looseCount }, palletSpec, stackWeight);
       if (pallet) {
-        palletTare = palletSpec.tare * pallet.totalPallets;
+        palletTare = palletSpec.tare; // 파렛트 1개
         // 규격·오버행 (아웃박스 배열 기준) 부착
         const fp = calcFootprint(palletSpec, getOuterBoxSpec('outer'));
         pallet.footprintW = fp.footprintW;
