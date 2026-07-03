@@ -20,6 +20,7 @@ import { INNER_UNITS, OUTER_CAP, COURIER_CAP } from './data';
 
 /** 인박스 1개 단위 (전개 후 패킹에 사용) */
 type FlatInner = {
+  fabric: string;           // 원단 (passthrough / 그룹핑 키) — Phase 5 Step 3-4
   size: number;
   meter: number;
   kind: InnerBoxKind;
@@ -42,7 +43,7 @@ function expandSized(items: SizedInnerCount[]): FlatInner[] {
   for (const item of items) {
     const productQtyPerBox = item.count > 0 ? item.productQty / item.count : 0;
     for (let i = 0; i < item.count; i++) {
-      flat.push({ size: item.size, meter: item.meter, kind: item.kind, productQtyPerBox });
+      flat.push({ fabric: item.fabric, size: item.size, meter: item.meter, kind: item.kind, productQtyPerBox });
     }
   }
   flat.sort((a, b) => b.kind - a.kind); // 145 → 95 → 60
@@ -54,7 +55,7 @@ function compressSized(items: FlatInner[]): SizedInnerCount[] {
   type Entry = FlatInner & { count: number };
   const map = new Map<string, Entry>();
   for (const item of items) {
-    const key = `${item.size}_${item.meter}_${item.kind}`;
+    const key = `${item.fabric}_${item.size}_${item.meter}_${item.kind}`;
     const existing = map.get(key);
     if (existing) {
       existing.count += 1;
@@ -65,6 +66,7 @@ function compressSized(items: FlatInner[]): SizedInnerCount[] {
   return Array.from(map.values())
     .sort((a, b) => b.kind - a.kind)
     .map(v => ({
+      fabric: v.fabric,
       size: v.size,
       meter: v.meter,
       kind: v.kind,
@@ -218,10 +220,10 @@ export function packIntoBoxes(perProduct: SizedInnerCount[][]): PackedBox[] {
   }
   if (allRemainders.length === 0) return result;
 
-  // 2단계-a: 사이즈(size,meter)별로 합쳐 풀 한 번 더 추출 → 사이즈별 잔여 <60 보장
+  // 2단계-a: (size,meter,fabric)별로 합쳐 풀 한 번 더 추출 → 같은 원단 우선, 사이즈별 잔여 <60 보장
   const bySize = new Map<string, FlatInner[]>();
   for (const item of allRemainders) {
-    const key = `${item.size}_${item.meter}`;
+    const key = `${item.fabric}_${item.size}_${item.meter}`;
     const arr = bySize.get(key);
     if (arr) arr.push(item);
     else bySize.set(key, [item]);

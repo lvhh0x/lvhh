@@ -20,6 +20,7 @@ const KINDS: InnerBoxKind[] = [145, 95, 60];
 export function decomposeToInnerBoxes(
   product: ProductSpec,
   qty: number,
+  fabric: string,
 ): SizedInnerCount[] {
   const available = KINDS
     .filter(k => product.innerCapacity[k] !== null)
@@ -52,6 +53,7 @@ export function decomposeToInnerBoxes(
       const count = counts.get(k)!;
       const cap = product.innerCapacity[k] as number;
       return {
+        fabric,
         size: product.size,
         meter: product.meter,
         kind: k,

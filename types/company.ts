@@ -59,6 +59,7 @@ export interface PalletSpec {
 // ─── 입력 ──────────────────────────────────────────────────────────────────────
 
 export interface ProductInput {
+  fabric: string; // 원단 타입 (자유입력, 미입력 시 '미지정') — Phase 5 Step 3-4
   size: number;   // 사이즈 (mm)
   meter: number;  // 미터 (m)
   qty: number;    // 수량 (개)
@@ -82,6 +83,7 @@ export interface InnerBoxCount {
  * 제품→박스까지 사이즈/미터 정보를 유지한다.
  */
 export interface SizedInnerCount {
+  fabric: string;      // 원단 타입 (제품→박스까지 passthrough) — Phase 5 Step 3-4
   size: number;        // 제품 사이즈 (mm): 40 | 60 | 110
   meter: number;       // 제품 미터 (m): 300
   kind: InnerBoxKind;  // 인박스 종류: 145 | 95 | 60

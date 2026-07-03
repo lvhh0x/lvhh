@@ -47,7 +47,7 @@ export function simulate(params: CompanyParams): SimulateOutcome {
   // ① 인박스 분해 (제품별 — 사이즈 정보 유지)
   const perProduct: SizedInnerCount[][] = validInputs.map(input => {
     const product = findProduct(input.size, input.meter)!;
-    return decomposeToInnerBoxes(product, input.qty);
+    return decomposeToInnerBoxes(product, input.qty, input.fabric);
   });
 
   // innerTotals: 화면 표시용 합산 (SizedInnerCount[] → InnerBoxCount[] 구조적 호환)
