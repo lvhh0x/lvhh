@@ -217,7 +217,7 @@
 
 ---
 
-## ✅ Phase 5 Step 3 — 대대적인 개선 (박스 그리드·파렛트 규격/오버행·원단 타입)
+## 🔄 Phase 5 Step 3 — 대대적인 개선 (박스 그리드·파렛트 규격/오버행·원단 타입)
 
 > 상세 설계: `docs/PHASE5-STEP3-PLAN.md` (마스터) + `docs/PHASE5-STEP3-IMPL-PLAN.md` (5단계).
 > 데이터 단일 출처: `lib/company/master.json`. 착수는 사용자 코딩 명령 이후.
