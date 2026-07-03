@@ -74,7 +74,7 @@ function run(tc: TestCase): void {
   }
 }
 
-const P = (size: number, qty: number) => ({ size, meter: 300, qty });
+const P = (size: number, qty: number) => ({ fabric: '미지정', size, meter: 300, qty });
 
 const cases: TestCase[] = [
   // ── 1~7 다품목 합의 케이스

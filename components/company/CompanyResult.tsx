@@ -73,6 +73,10 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
   const pallet = result.pallet;
   const palletSpec = pallet ? findPallet(pallet.palletId) : null;
 
+  // 무게 표시 분리 (Phase 5 Step 3-4): 값 계산은 엔진 그대로, 여기선 적재/파렛트로 역산만.
+  const palletTare = palletSpec ? palletSpec.tare : 0;
+  const loadWeight = result.totalWeight - palletTare; // 적재물(짐)만
+
   return (
     <div>
       {/* [1] 박스 결과 */}
@@ -133,7 +137,17 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
             color: '#DCC08A',
           }}
         >
-          총 무게 {result.totalWeight.toFixed(2)} kg
+          적재 무게 {loadWeight.toFixed(2)} kg
+        </div>
+        <div
+          style={{
+            fontFamily: 'var(--font-manrope), sans-serif',
+            fontSize: '10px',
+            color: '#8c7a55',
+            marginTop: '2px',
+          }}
+        >
+          (적재물만 · 파렛트 제외)
         </div>
         {result.weightIncomplete && (
           <div
@@ -197,8 +211,10 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
                 )}
               </div>
             )}
+            <div>적재 무게: {loadWeight.toFixed(2)} kg</div>
+            <div>파렛트 무게: {palletTare.toFixed(2)} kg</div>
             <div style={{ color: '#DCC08A' }}>
-              적재 무게: {pallet.weight.toFixed(2)} kg
+              총 무게: {result.totalWeight.toFixed(2)} kg
             </div>
           </div>
         </div>

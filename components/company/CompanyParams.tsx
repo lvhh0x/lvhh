@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import type { ProductInput, CompanyParams as CompanyParamsType } from '@/types/company';
 import { PALLETS, PRODUCTS } from '@/lib/company/data';
+import { normalizeFabric } from '@/lib/company/fabric';
 
 interface Props {
   onSubmit: (params: CompanyParamsType) => void;
@@ -13,12 +14,13 @@ interface Props {
 }
 
 interface RowState {
+  fabric: string;
   size: string;
   meter: string;
   qty: string;
 }
 
-const EMPTY_ROW: RowState = { size: '', meter: '', qty: '' };
+const EMPTY_ROW: RowState = { fabric: '', size: '', meter: '', qty: '' };
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -62,6 +64,7 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
   function handleRun() {
     const products: ProductInput[] = rows
       .map(r => ({
+        fabric: normalizeFabric(r.fabric),
         size: Number(r.size),
         meter: Number(r.meter),
         qty: Number(r.qty),
@@ -121,6 +124,16 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
                 : 'none',
           }}
         >
+          <div style={{ marginBottom: '8px' }}>
+            <label style={labelStyle}>원단</label>
+            <input
+              type="text"
+              value={row.fabric}
+              onChange={e => updateRow(idx, 'fabric', e.target.value)}
+              placeholder="B220 (미입력 시 미지정)"
+              style={inputStyle}
+            />
+          </div>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>사이즈</label>

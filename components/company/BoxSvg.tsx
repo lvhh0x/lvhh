@@ -2,6 +2,7 @@
 // 종류별 색/라벨은 유지, 내용물 한 줄씩 표기 (SVG 높이 동적 확장)
 
 import type { SizedInnerCount, OuterBoxKind } from '@/types/company';
+import { distinctFabricsByQty } from '@/lib/company/fabric';
 
 type BoxVisualKind = OuterBoxKind | 'loose';
 
@@ -32,7 +33,7 @@ function heightMult(kind: BoxVisualKind): number {
   return 1.0;
 }
 
-/** 내용물 한 줄 폭 추정(px) — 서버 렌더라 실측 불가 → 글자별 넓넓한 추정(과소추정 방지) */
+/** 내용물 한 줄 폭 추정(px) — 서버 렌더라 실측 불가 → 글자별 넘넘한 추정(과소추정 방지) */
 function estimateLineWidth(str: string, fontSize: number): number {
   let units = 0;
   for (const ch of str) {
@@ -55,11 +56,18 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
   const labelFontSize   = Math.round(w * 0.115);
   const contentFontSize = Math.round(w * 0.100);
 
-  // 내용물/라벨 최대 폭에 맞게 캔버스 가로 확장 (박스 그림 크기는 그대로)
+  // 원단 라벨 줄 구성 (Phase 5 Step 3-4)
+  //   1종 → "B220 아웃박스" 1줄 / 2종+ → 윗줄 "B220+B324", 아랫줄 "아웃박스" (2줄 통일)
+  const fabrics = distinctFabricsByQty(contents);
+  const labelLines = fabrics.length <= 1
+    ? [`${fabrics[0] ?? '미지정'} ${v.label}`]
+    : [fabrics.join('+'), v.label];
+
+  // 내용물/라벨 최대 폭에 맞게 캠버스 가로 확장 (박스 그림 크기는 그대로)
   const contentMaxW = contents.reduce((mx, c) => Math.max(mx, estimateLineWidth(contentLine(c), contentFontSize)), 0);
-  const labelW      = estimateLineWidth(v.label, labelFontSize);
+  const labelW      = labelLines.reduce((mx, s) => Math.max(mx, estimateLineWidth(s, labelFontSize)), 0);
   const canvasW     = Math.max(w, Math.ceil(Math.max(contentMaxW, labelW)) + 16);  // 좌우 8px 여유
-  const ox          = (canvasW - w) / 2;  // 박스 그림을 넓은 캔버스 가운데로
+  const ox          = (canvasW - w) / 2;  // 박스 그림을 넓은 캠버스 가운데로
 
   // 박스 아이소메트릭 좌표 (x는 +ox 적용, bh만 종류별 축소)
   const depth = w * 0.22;
@@ -70,9 +78,11 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
 
   // 라벨·내용물 레이아웃 (박스 하단 기준)
   const lineH           = contentFontSize + 5;
+  const labelLineH      = labelFontSize + 4;
   const boxBottom       = by + bh;
-  const labelY          = Math.round(boxBottom + w * 0.17);
-  const firstContentY   = labelY + lineH + 2;
+  const labelY          = Math.round(boxBottom + w * 0.17);           // 첫 라벨 줄
+  const labelBlockBottom = labelY + (labelLines.length - 1) * labelLineH;
+  const firstContentY   = labelBlockBottom + lineH + 2;
   const totalH          = firstContentY + contents.length * lineH + 6;
 
   return (
@@ -120,18 +130,21 @@ export default function BoxSvg({ kind, contents, filled, size = 120 }: Props) {
         />
       )}
 
-      {/* 종류 라벨 */}
-      <text
-        x={canvasW / 2}
-        y={labelY}
-        textAnchor="middle"
-        fontFamily="var(--font-jetbrains-mono), monospace"
-        fontSize={labelFontSize}
-        fill="#E8E0D2"
-        style={{ fontFeatureSettings: "'zero' 0" }}
-      >
-        {v.label}
-      </text>
+      {/* 종류 라벨 (원단 접두 — 혼합이면 2줄) */}
+      {labelLines.map((line, i) => (
+        <text
+          key={`lbl-${i}`}
+          x={canvasW / 2}
+          y={labelY + i * labelLineH}
+          textAnchor="middle"
+          fontFamily="var(--font-jetbrains-mono), monospace"
+          fontSize={labelFontSize}
+          fill="#E8E0D2"
+          style={{ fontFeatureSettings: "'zero' 0" }}
+        >
+          {line}
+        </text>
+      ))}
 
       {/* 내용물 한 줄씩 (사이즈·미터·인박스종류·수량·제품수량) */}
       {contents.map((c, i) => (
