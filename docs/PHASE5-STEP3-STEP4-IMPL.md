@@ -25,7 +25,7 @@
 - `simulate.ts`: `totalWeight = 제품 + 인박스tare + 아웃박스tare + palletTare` → **파렛트 포함**.
 - `pallet.ts`: `pallet.weight = pallet.tare + stackWeight` (stackWeight=적재물) → **파렛트 포함** (= totalWeight와 동일 값).
 - `master.json`의 각 파렛트에 `tare`(700=9.0/900=12.4/1100=23.3/플라스틱A=10.5/B=18.5) **이미 존재** → master.json 수정 불필요.
-- 화면: `[1]`은 `총 무게 {totalWeight}`(파렛트 몰래 포함), `[2]`는 `적재 무게 {pallet.weight}`(라벨은 적재인데 값은 파렛트 포함) → **두 곳에 같은 값**이 찍혔 혼란.
+- 화면: `[1]`은 `총 무게 {totalWeight}`(파렛트 몰래 포함), `[2]`는 `적재 무게 {pallet.weight}`(라벨은 적재인데 값은 파렛트 포함) → **두 곳에 같은 값**이 찍혀 혼란.
 - **해결:** 값 계산은 그대로, **표시만** 분리. 컴포넌트에서 `loadWeight = totalWeight − palletTare`로 역산 → 엔진/타입 무수정.
 
 ### 1.2 원단 그룹핑 — 현재 알고리즘과의 접점
@@ -81,7 +81,7 @@
 - [x] `BoxSvg.tsx` — `distinctFabricsByQty(contents)`로 라벨 구성
   - 1종: `${원단} ${박스종류}` 1줄
   - 2종↑: 윗줄 `원단+원단+…`, 아랫줄 `박스종류` (2줄 통일)
-  - 캠버스 폭/세로 레이아웃을 라벨 줄 수에 맞춰 조정(기존 `estimateLineWidth` 재사용)
+  - 캔버스 폭/세로 레이아웃을 라벨 줄 수에 맞춰 조정(기존 `estimateLineWidth` 재사용)
 - [x] `CompanyResult.tsx` — 무게 표시 분리 (원단 라벨은 BoxSvg가 전담, 여기선 **무게만** 수정)
   - `[1]` 박스 결과: `총 무게` → **`적재 무게 {load}`** (load = totalWeight − palletTare)
   - `[2]` 파렛트 결과: `적재 무게 {load}` / `파렛트 무게 {palletTare}` / **`총 무게 {totalWeight}`**(강조)
@@ -110,7 +110,7 @@
 - 파렛트 선택 시 `총 무게 = 적재 무게 + 파렛트 tare`, `적재 무게 = totalWeight − palletTare`
 - 파렛트 미선택 시 `적재 무게 == totalWeight`(palletTare=0)
 
-전 과정 `tsc --noEmit` 0 에러, JSX 한글 가드 통과, `npm run build` 성공(폰트 스턴 로컬·원복).
+전 과정 `tsc --noEmit` 0 에러, JSX 한글 가드 통과, `npm run build` 성공(폰트 스텁 로컬·원복).
 
 ---
 
@@ -125,7 +125,7 @@
 | B 입력폼 | ✅ | 원단 텍스트 입력(원단→사이즈→미터→수량), 미지정 정규화 |
 | E 표시(BoxSvg/무게) | ✅ | 원단 라벨 1/2줄, 무게 3줄 분해(역산) |
 | T 테스트 | ✅ | test-step3-4 17/17, test-step4 P 헬퍼 fabric, 회귀 19·5·80 무영향 |
-| 빌드 | ✅ | tsc 0 · JSX 가드 OK · build 9/9 (스턴 원복) |
+| 빌드 | ✅ | tsc 0 · JSX 가드 OK · build 9/9 (스텁 원복) |
 | push | ✅ | main 커밋 `a26307a`(엔진/타입/테스트) + `34a44a6`(프론트) — 원격 재클론 tsc·테스트 재검증 통과 |
 
 *이 문서는 구현 진행에 따라 갱신된다.*
