@@ -4,7 +4,7 @@
 
 ---
 
-## ✅ Phase 0 — 아키테체마 설계 & 문서화
+## ✅ Phase 0 — 아키텍처 설계 & 문서화
 - [x] 원본 HTML 분석
 - [x] 기술 스택 결정 (Next.js 14, Vercel, Supabase)
 - [x] DB 현황 파악 (Supabase 테이블 18개 확인)
@@ -45,7 +45,7 @@
 
 ---
 
-## ✅ Phase 3 — 홍 페이지
+## ✅ Phase 3 — 홈 페이지
 - [x] `lib/svg/generators.ts` (→ FE-07)
 - [x] `components/svg/LineSvg.tsx` (→ FE-07)
 - [x] `components/svg/CandleSvg.tsx` (→ FE-07)
@@ -110,7 +110,7 @@
 - [ ] `/stock/schd` 전체 흐름 확인 (Python 서버 기동 후)
 
 ### Step 5 — 문서 업데이트 ✅
-- [x] PROGRESS.md Phase 4 체크리스툓 완료 처리
+- [x] PROGRESS.md Phase 4 체크리스트 완료 처리
 - [x] MASTER.md 모듈 상태 업데이트
 
 ---
@@ -123,13 +123,13 @@
 - [x] `lib/stock/tiles.ts` (그리드 6칸 단일 소스: ETF 시뮬레이션 활성 + ETF 비교/스위칭/준비중×3 비활성)
 - [x] `components/stock/SimTile.tsx` (active = Link / coming-soon = dim div)
 - [x] `app/stock/page.tsx` 타일 기반 그리드로 전환
-- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스턴 로컬)
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬)
 
 ### Step 2 — 직접입력 화면 + range 3-상태 (요청 ①②) ✅ — 커밋 `38c83cf`
 - [x] `app/stock/etf/page.tsx` (티커/코드 직접입력 → range 3-상태 조회 → 기존 2패널 재사용)
 - [x] `components/stock/StockParams.tsx` `rangeStatus`·`onRetryRange` 필수 prop + 실패 UI([다시 시도])
 - [x] `app/stock/[id]/page.tsx` range 3-상태 동일 적용 (무한 "조회 중…" 멈춤 근본 수정)
-- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스턴 로컬)
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬)
 
 ### Step 3 — 인프라 (요청 ②, 사용자) ✅
 - [x] Python Railway 배포 → `https://meridian-production-e345.up.railway.app`
@@ -146,7 +146,7 @@
 
 ### Step 1-A — 데이터 & 타입 기반 ✅ — 커밋 `e8f5590`
 - [x] `types/company.ts` 새 타입으로 교체 (InnerBoxKind, PackedBox, CompanyResult 등)
-- [x] `lib/company/data.ts` 마스터 데이터 작성 (제퐈3·인박스3·아웃박스2·파렛트5)
+- [x] `lib/company/data.ts` 마스터 데이터 작성 (제품3·인박스3·아웃박스2·파렛트5)
 - [x] `lib/company/tiles.ts` 6타일 데이터 작성
 - [x] `npx tsc --noEmit` 통과
 
@@ -177,7 +177,7 @@
 
 ### Step 1-F — 검증 & 문서 ✅
 - [x] 로컬 클론 + `npm install` + `npx tsc --noEmit` 통과
-- [x] `npm run build` 통과 (폰트 스턴 로컬)
+- [x] `npm run build` 통과 (폰트 스텁 로컬)
 - [x] 검증 로그 마크다운 문서 작성
 - [x] `docs/PROGRESS.md` / `docs/MASTER.md` Phase 5 Step 1 완료 처리
 
@@ -212,12 +212,12 @@
 ### Step 2-6 — 검증 ✅ (18/18 통과)
 - [x] `scripts/test-step4.ts` 18개 케이스 (HANDOFF §4.4 예시 A/B/C + 3사이즈 혼합)
 - [x] `npx tsc --noEmit` 에러 0
-- [x] `npm run build` 통과 (폰트 스턴 로컬)
+- [x] `npm run build` 통과 (폰트 스텁 로컬)
 - [x] `docs/PHASE5-STEP2-VERIFY-LOG.md` 생성
 
 ---
 
-## 🔲 Phase 5 Step 3 — 대대적인 개선 (박스 그리드·파렛트 규격/오버행·원단 타입)
+## ✅ Phase 5 Step 3 — 대대적인 개선 (박스 그리드·파렛트 규격/오버행·원단 타입)
 
 > 상세 설계: `docs/PHASE5-STEP3-PLAN.md` (마스터) + `docs/PHASE5-STEP3-IMPL-PLAN.md` (5단계).
 > 데이터 단일 출처: `lib/company/master.json`. 착수는 사용자 코딩 명령 이후.
@@ -237,7 +237,7 @@
 - [x] `types/company.ts` PalletLayout + PalletStack footprint/overhang 필드
 - [x] master.json 각 pallet에 `layout {cols,rows,rotated}` 하드코딩 (Phase 6 DB 이관 전제)
 - [x] 검증 `scripts/test-step3-2.ts` 5/5 통과 + 회귀 test-step4 19/19 통과
-- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스턴 로컬, 원복)
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬, 원복)
 
 ### Step 3-3 — 파렛트 슬롯/빈칸/오버 재설계 (요구 2) ✅ — 상세 `docs/PHASE5-STEP3-STEP3-IMPL.md`, 검증 `docs/PHASE5-STEP3-VERIFY-LOG.md`
 - [x] `pallet.ts` 재작성: 파렛트 1개 전제 + 슬롯 환산(아웃1/택배1/낱개2=1)
@@ -256,12 +256,12 @@
 - [x] `CompanyResult.tsx` 무게 표시 분리 (적재/파렛트/총) — 값 계산 무수정
 - [x] `lib/company/fabric.ts` 신규 (normalizeFabric, distinctFabricsByQty)
 - [x] `scripts/test-step3-4.ts` 신규 검증 (17/17) + 회귀(19·5·80) 무영향
-- [x] `npx tsc --noEmit` 통과 · JSX 가드 OK · `npm run build` 성공(폰트 스턴 로컬·원복)
+- [x] `npx tsc --noEmit` 통과 · JSX 가드 OK · `npm run build` 성공(폰트 스텁 로컬·원복)
 
 ### Step 3-5 — 통합 검증 & 빌드
 - [ ] `scripts/` 회귀 테스트에 신규 케이스 추가(원단/슬롯초과/오버행)
 - [ ] `npx tsc --noEmit` 에러 0
-- [ ] `npm run build` 통과 (폰트 스턴 로컬)
+- [ ] `npm run build` 통과 (폰트 스텁 로컬)
 - [ ] `lvhh.vercel.app/company` 브라우저 5개 항목 확인
 - [ ] `docs/PHASE5-STEP3-VERIFY-LOG.md` 생성
 - [ ] PROGRESS.md / MASTER.md 완료 처리
@@ -278,7 +278,7 @@
 
 ## 🔲 Phase 7 — 보안
 - [ ] RLS 정적 사용자 확인
-- [ ] 리발/라벨 테이블 RLS 활성화 + 차단
+- [ ] 리본/라벨 테이블 RLS 활성화 + 차단
 - [ ] 시뮬레이션 테이블 RLS + SELECT 공개 허용
 - [ ] /api/pallets 정상 응답 확인
 
@@ -296,7 +296,7 @@
 
 | 날짜 | Phase | 내용 | 담당 |
 |------|-------|------|------|
-| 2026-06-23 | Phase 0 | 전체 아키테체마 설계 & 문서화 | Claude Sonnet 4.6 |
+| 2026-06-23 | Phase 0 | 전체 아키텍처 설계 & 문서화 | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 1 | Next.js 14 프로젝트 초기화 (next@14.2.35) | Claude Sonnet 4.6 |
 | 2026-06-24 | Phase 2 | 공통 레이아웃 + 라우팅 (FE-01, LIB-02) | Claude Sonnet 4.6 |
 | 2026-06-25 | Phase 3-1 | SVG 엔진 구현 (FE-07: generators, LineSvg, CandleSvg, PalletSvg, IconSvg) | Claude Sonnet 4.6 |
