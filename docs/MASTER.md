@@ -15,7 +15,7 @@
 | DB | Supabase 프로젝트 `lnnxjwfvzaelsoupozke` (ap-northeast-1, Tokyo) |
 | 접근 방식 | 공개 사이트 (로그인 없음) |
 | 원본 HTML | `시뮬레이션_데스크_럭셔리_dc.html` (이 파일이 레이아웃 기준) |
-| 현재 단계 | **Phase 5 Step 3 진행 예정 — 대대적인 개선 (박스 그리드 5열·파렛트 규격/오버행·원단 타입). 상세: `docs/PHASE5-STEP3-PLAN.md` + `docs/PHASE5-STEP3-IMPL-PLAN.md`. Step 3 완료 후 Phase 6 DB 연동** |
+| 현재 단계 | **Phase 5 Step 3 진행 중 — Step 3-1~3-4 완료(박스 5열·규격/오버행·슬롯·원단 타입+무게 분리). 남음: Step 3-5 통합 검증(브라우저 육안 `/company/box-pallet`). 상세: `docs/PHASE5-STEP3-STEP4-IMPL.md`, 검증 `docs/PHASE5-STEP3-VERIFY-LOG.md`. Step 3 완료 후 Phase 6 DB 연동** |
 
 ---
 
@@ -156,7 +156,7 @@ ribbon_types, label_specs, customers, delivery_routes, label_batches, label_batc
 ✅ Phase 4.5 — ETF 그리드 재설계 + 직접입력 + 조회 3-상태 UX
 ✅ Phase 5 Step 1 — 박스·파렛트 적재 시뮬레이션 (FE-05, FE-06, LIB-01) — 10개 케이스 검증
 ✅ Phase 5 Step 2 — SizedInnerCount 사이즈 보존 + outerbox 알고리즘 개선 + master.json JSON 분리 — 18개 케이스 검증
-🔲 Phase 5 Step 3 — 대대적인 개선: 박스 그리드 5열 + 파렛트 슬롯/빈칸/오버 + 규격·오버행 엔진 + 원단 타입 (상세: PHASE5-STEP3-PLAN.md / PHASE5-STEP3-IMPL-PLAN.md)
+🔄 Phase 5 Step 3 — 대대적인 개선: 3-1 박스 5열 ✅ / 3-2 규격·오버행 ✅ / 3-3 슬롯·빈칸·오버 ✅ / 3-4 원단 타입+무게 분리 ✅ / 3-5 통합 검증(브라우저 육안) 🔲
 🔲 Phase 6 — DB 연동 (master.json → Supabase)
 🔲 Phase 7 — 보안 (RLS)
 🔲 Phase 8 — Vercel 배포 & 검증

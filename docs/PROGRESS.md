@@ -110,7 +110,7 @@
 - [ ] `/stock/schd` 전체 흐름 확인 (Python 서버 기동 후)
 
 ### Step 5 — 문서 업데이트 ✅
-- [x] PROGRESS.md Phase 4 체크리스틈 완료 처리
+- [x] PROGRESS.md Phase 4 체크리스툓 완료 처리
 - [x] MASTER.md 모듈 상태 업데이트
 
 ---
@@ -123,13 +123,13 @@
 - [x] `lib/stock/tiles.ts` (그리드 6칸 단일 소스: ETF 시뮬레이션 활성 + ETF 비교/스위칭/준비중×3 비활성)
 - [x] `components/stock/SimTile.tsx` (active = Link / coming-soon = dim div)
 - [x] `app/stock/page.tsx` 타일 기반 그리드로 전환
-- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬)
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스턴 로컬)
 
 ### Step 2 — 직접입력 화면 + range 3-상태 (요청 ①②) ✅ — 커밋 `38c83cf`
 - [x] `app/stock/etf/page.tsx` (티커/코드 직접입력 → range 3-상태 조회 → 기존 2패널 재사용)
 - [x] `components/stock/StockParams.tsx` `rangeStatus`·`onRetryRange` 필수 prop + 실패 UI([다시 시도])
 - [x] `app/stock/[id]/page.tsx` range 3-상태 동일 적용 (무한 "조회 중…" 멈춤 근본 수정)
-- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬)
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스턴 로컬)
 
 ### Step 3 — 인프라 (요청 ②, 사용자) ✅
 - [x] Python Railway 배포 → `https://meridian-production-e345.up.railway.app`
@@ -146,7 +146,7 @@
 
 ### Step 1-A — 데이터 & 타입 기반 ✅ — 커밋 `e8f5590`
 - [x] `types/company.ts` 새 타입으로 교체 (InnerBoxKind, PackedBox, CompanyResult 등)
-- [x] `lib/company/data.ts` 마스터 데이터 작성 (제품3·인박스3·아웃박스2·파렛트5)
+- [x] `lib/company/data.ts` 마스터 데이터 작성 (제퐈3·인박스3·아웃박스2·파렛트5)
 - [x] `lib/company/tiles.ts` 6타일 데이터 작성
 - [x] `npx tsc --noEmit` 통과
 
@@ -177,7 +177,7 @@
 
 ### Step 1-F — 검증 & 문서 ✅
 - [x] 로컬 클론 + `npm install` + `npx tsc --noEmit` 통과
-- [x] `npm run build` 통과 (폰트 스텁 로컬)
+- [x] `npm run build` 통과 (폰트 스턴 로컬)
 - [x] 검증 로그 마크다운 문서 작성
 - [x] `docs/PROGRESS.md` / `docs/MASTER.md` Phase 5 Step 1 완료 처리
 
@@ -212,7 +212,7 @@
 ### Step 2-6 — 검증 ✅ (18/18 통과)
 - [x] `scripts/test-step4.ts` 18개 케이스 (HANDOFF §4.4 예시 A/B/C + 3사이즈 혼합)
 - [x] `npx tsc --noEmit` 에러 0
-- [x] `npm run build` 통과 (폰트 스텁 로컬)
+- [x] `npm run build` 통과 (폰트 스턴 로컬)
 - [x] `docs/PHASE5-STEP2-VERIFY-LOG.md` 생성
 
 ---
@@ -237,7 +237,7 @@
 - [x] `types/company.ts` PalletLayout + PalletStack footprint/overhang 필드
 - [x] master.json 각 pallet에 `layout {cols,rows,rotated}` 하드코딩 (Phase 6 DB 이관 전제)
 - [x] 검증 `scripts/test-step3-2.ts` 5/5 통과 + 회귀 test-step4 19/19 통과
-- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스텁 로컬, 원복)
+- [x] `npx tsc --noEmit` 통과 / `npm run build` 통과 (폰트 스턴 로컬, 원복)
 
 ### Step 3-3 — 파렛트 슬롯/빈칸/오버 재설계 (요구 2) ✅ — 상세 `docs/PHASE5-STEP3-STEP3-IMPL.md`, 검증 `docs/PHASE5-STEP3-VERIFY-LOG.md`
 - [x] `pallet.ts` 재작성: 파렛트 1개 전제 + 슬롯 환산(아웃1/택배1/낱개2=1)
@@ -247,18 +247,21 @@
 - [x] `CompanyResult.tsx` 적재 오버 경고 표시
 - [x] `npx tsc --noEmit` 통과 (+ 검증 스크립트 80/80, 회귀 24케이스 통과, 빌드 성공)
 
-### Step 3-4 — 원단 타입 도입 (요구 5)
-- [ ] `types/company.ts` ProductInput/SizedInnerCount에 `fabric` 추가
-- [ ] `CompanyParams.tsx` 입력 순서: 원단→사이즈→미터→수량 (자유입력 텍스트)
-- [ ] `innerbox.ts` fabric passthrough
-- [ ] `outerbox.ts` 같은 원단 우선 그룹핑 (안 차면 섞어 60) — 개수 규칙 불변
-- [ ] `BoxSvg.tsx`/`CompanyResult.tsx` 원단 표기 (형식: "B220 아웃박스" — 사용자 확정, 2026-07-01)
-- [ ] `npx tsc --noEmit` 통과
+### Step 3-4 — 원단 타입 도입 (요구 5) ✅ — 상세 `docs/PHASE5-STEP3-STEP4-IMPL.md`, 검증 `docs/PHASE5-STEP3-VERIFY-LOG.md`
+- [x] `types/company.ts` ProductInput/SizedInnerCount에 `fabric` 추가
+- [x] `CompanyParams.tsx` 입력 순서: 원단→사이즈→미터→수량 (자유입력 텍스트)
+- [x] `innerbox.ts` fabric passthrough
+- [x] `outerbox.ts` 같은 원단 우선 그룹핑 (안 차면 섞어 60) — 개수 규칙 불변
+- [x] `BoxSvg.tsx` 원단 표기 (1종 "B220 아웃박스" / 혼합 2줄 "B220+B324" + "아웃박스")
+- [x] `CompanyResult.tsx` 무게 표시 분리 (적재/파렛트/총) — 값 계산 무수정
+- [x] `lib/company/fabric.ts` 신규 (normalizeFabric, distinctFabricsByQty)
+- [x] `scripts/test-step3-4.ts` 신규 검증 (17/17) + 회귀(19·5·80) 무영향
+- [x] `npx tsc --noEmit` 통과 · JSX 가드 OK · `npm run build` 성공(폰트 스턴 로컬·원복)
 
 ### Step 3-5 — 통합 검증 & 빌드
 - [ ] `scripts/` 회귀 테스트에 신규 케이스 추가(원단/슬롯초과/오버행)
 - [ ] `npx tsc --noEmit` 에러 0
-- [ ] `npm run build` 통과 (폰트 스텁 로컬)
+- [ ] `npm run build` 통과 (폰트 스턴 로컬)
 - [ ] `lvhh.vercel.app/company` 브라우저 5개 항목 확인
 - [ ] `docs/PHASE5-STEP3-VERIFY-LOG.md` 생성
 - [ ] PROGRESS.md / MASTER.md 완료 처리
@@ -318,3 +321,4 @@
 | 2026-07-01 | Phase 5-Step3-1 | 박스 그리드 5열 (grid minmax + BoxSvg 반응형) 커밋 3523124, 9e74caf — Chrome 실브라우저 검증 완료 | Claude Sonnet 4.6 |
 | 2026-07-02 | Phase 5-Step3-2 | 규격·오버행 엔진 신설 (overhang.ts + master.json layout + PalletStack footprint/overhang), 배열표 확정(700=2×2/900=3×2회전/1100·플라스틱=3×3), 검증 5/5 + 회귀 19/19 | Claude Opus 4.8 |
 | 2026-07-02 | Phase 5-Step3-3 | 파렛트 슬롯·빈칸·오버플로우 재설계 (pallet.ts 재작성 + PalletStack 슬롯 필드 + SlotKind + CompanyPalletSvg 슬롯 렌더 + overflow 경고), 검증 80/80 + 회귀 24 | Claude Opus 4.8 |
+| 2026-07-03 | Phase 5-Step3-4 | 원단 타입 도입 + 무게 표시 분리 (fabric.ts 신규 + types/innerbox/outerbox/simulate + CompanyParams/BoxSvg/CompanyResult), 검증 17/17 + 회귀 19·5·80, 커밋 a26307a·34a44a6 | Claude Opus 4.8 |
