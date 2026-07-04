@@ -217,7 +217,7 @@
 
 ---
 
-## 🔄 Phase 5 Step 3 — 대대적인 개선 (박스 그리드·파렛트 규격/오버행·원단 타입)
+## ✅ Phase 5 Step 3 — 대대적인 개선 (박스 그리드·파렛트 규격/오버행·원단 타입)
 
 > 상세 설계: `docs/PHASE5-STEP3-PLAN.md` (마스터) + `docs/PHASE5-STEP3-IMPL-PLAN.md` (5단계).
 > 데이터 단일 출처: `lib/company/master.json`. 착수는 사용자 코딩 명령 이후.
@@ -258,13 +258,15 @@
 - [x] `scripts/test-step3-4.ts` 신규 검증 (17/17) + 회귀(19·5·80) 무영향
 - [x] `npx tsc --noEmit` 통과 · JSX 가드 OK · `npm run build` 성공(폰트 스텁 로컬·원복)
 
-### Step 3-5 — 통합 검증 & 빌드
-- [ ] `scripts/` 회귀 테스트에 신규 케이스 추가(원단/슬롯초과/오버행)
-- [ ] `npx tsc --noEmit` 에러 0
-- [ ] `npm run build` 통과 (폰트 스텁 로컬)
-- [ ] `lvhh.vercel.app/company` 브라우저 5개 항목 확인
-- [ ] `docs/PHASE5-STEP3-VERIFY-LOG.md` 생성
-- [ ] PROGRESS.md / MASTER.md 완료 처리
+### Step 3-5 — 통합 검증 & 빌드 ✅ — 검증 `docs/PHASE5-STEP3-VERIFY-LOG.md` (§ Step 3-5)
+- [x] `scripts/test-step3-5.ts` 신규 — 원단혼합+슬롯초과+오버행 통합 4시나리오(S1~S4) 13/13 통과
+- [x] `npx tsc --noEmit` 에러 0 · JSX 한글 가드 OK
+- [x] `npm run build` 통과 9/9 (폰트 스텁 로컬·원복)
+- [x] 회귀 무영향: test-step3-2 5/5 · test-step3-3 80/80 · test-step3-4 17/17 · test-step4 19/19
+- [x] `lvhh.vercel.app/company/box-pallet` 브라우저 5개 항목 육안 확인 (Chrome 실브라우저)
+      ① 5열 그리드 ② 슬롯/빈칸/적재초과 경고 ③ 규격·오버행(945×710, 가로45) ④ 원단 라벨 1종/혼합 ⑤ 무게 3줄
+- [x] `docs/PHASE5-STEP3-VERIFY-LOG.md`에 Step 3-5 섹션 추가
+- [x] PROGRESS.md / MASTER.md 완료 처리
 
 ---
 
@@ -322,3 +324,4 @@
 | 2026-07-02 | Phase 5-Step3-2 | 규격·오버행 엔진 신설 (overhang.ts + master.json layout + PalletStack footprint/overhang), 배열표 확정(700=2×2/900=3×2회전/1100·플라스틱=3×3), 검증 5/5 + 회귀 19/19 | Claude Opus 4.8 |
 | 2026-07-02 | Phase 5-Step3-3 | 파렛트 슬롯·빈칸·오버플로우 재설계 (pallet.ts 재작성 + PalletStack 슬롯 필드 + SlotKind + CompanyPalletSvg 슬롯 렌더 + overflow 경고), 검증 80/80 + 회귀 24 | Claude Opus 4.8 |
 | 2026-07-03 | Phase 5-Step3-4 | 원단 타입 도입 + 무게 표시 분리 (fabric.ts 신규 + types/innerbox/outerbox/simulate + CompanyParams/BoxSvg/CompanyResult), 검증 17/17 + 회귀 19·5·80, 커밋 a26307a·34a44a6 | Claude Opus 4.8 |
+| 2026-07-04 | Phase 5-Step3-5 | 통합 검증 (test-step3-5 신규 13/13 + 회귀 4종 무영향 + 실브라우저 5개 항목 육안) → Phase 5 Step 3 종결 | Claude Opus 4.8 |
