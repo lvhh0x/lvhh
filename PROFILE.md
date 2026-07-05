@@ -1,4 +1,4 @@
-# PROFILE.md — MERIDIAN · v1.0 · 2026-07-04
+# PROFILE.md — MERIDIAN · v1.1 · 2026-07-05
 이 파일은 lawbook 법전의 {{PROFILE.*}} 슬롯 값을 정의한다. 위치: 저장소 루트 고정.
 
 ## 스택
@@ -44,3 +44,9 @@ tsc --noEmit (통과 기준: 0 에러)
 - NEXT_PUBLIC_SUPABASE_URL — 클라이언트 노출 가능
 - NEXT_PUBLIC_SUPABASE_ANON_KEY — 클라이언트 노출 가능
 - SUPABASE_SERVICE_ROLE_KEY — 서버 전용, 클라이언트 노출 절대 금지
+
+## 배포방식
+Vercel — main push 시 자동 배포 (push = 실서비스 배포)
+
+## 보안과제
+- Supabase RLS 비활성 — 공개 런칭 전 해결
