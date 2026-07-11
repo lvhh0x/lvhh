@@ -7,7 +7,7 @@
 //          + Σ(아웃박스 tare 0.5, 택배박스 tare=0)
 //          + (파렛트 적재 시) 파렛트 tare
 //
-// 60인박스·택배박스 tare는 0kg placeholder → weightIncomplete 플래그.
+// 모든 tare는 실측 확정값 (Phase 6, 2026-07-11).
 
 import type {
   ProductSpec,
@@ -62,18 +62,6 @@ export function calcOuterBoxTare(boxes: PackedBox[]): number {
     // loose → 박스 없음
   }
   return sum;
-}
-
-/**
- * 60인박스 또는 택배박스가 포함되어 무게가 과소 표시되는지 여부.
- */
-export function isWeightIncomplete(
-  totals: InnerBoxCount[],
-  boxes: PackedBox[],
-): boolean {
-  const has60 = totals.some(t => t.kind === 60 && t.count > 0);
-  const hasCourier = boxes.some(b => b.kind === 'courier');
-  return has60 || hasCourier;
 }
 
 /**

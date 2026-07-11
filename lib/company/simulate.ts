@@ -21,7 +21,6 @@ import {
   calcInnerBoxTare,
   calcOuterBoxTare,
   calcPackedBoxWeight,
-  isWeightIncomplete,
 } from './weight';
 
 export interface SimulateError {
@@ -98,7 +97,6 @@ export function simulate(params: CompanyParams): SimulateOutcome {
     looseCount,
     totalWeight,
     pallet,
-    weightIncomplete: isWeightIncomplete(innerTotals, boxes),
   };
 
   return { ok: true, result };
