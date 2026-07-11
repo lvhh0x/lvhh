@@ -270,11 +270,23 @@
 
 ---
 
-## 🔲 Phase 6 — DB 연동
-- [ ] `pallet_types` 실제 데이터 확인
-- [ ] `/api/pallets` → Supabase 연결 검증
-- [ ] per_layer 콜럼 추가 여부 사용자 결정
-- [ ] 하드코딩 → DB 데이터 교체
+## 🔶 Phase 6 — DB 연동 (회사 시뮬레이션 완료 2026-07-11)
+
+### Step 1 — 박스 시뮬레이션 DB 전환 ✅ (세션: 박스시뮬레이션)
+- [x] DB 정정: 95인박스 높이 95 · 파렛트 700/900 높이 140 · 1100 폭 1100 (사용자 확정값)
+- [x] 컬럼 추가: pallet_types(boxes_per_layer/layout_*) · outer_box_types(capacity_unit/per_layer_unit) · inner_box_types(outer_unit/courier_unit)
+- [x] `roll_weights` 테이블 신설 + 초기 3행 (40/60/110 × 300M 실측 무게)
+- [x] `app/api/company/master/route.ts` 신규 — 5테이블 조회 → MasterData 조립 (force-dynamic, 캐싱 없음)
+- [x] `lib/company/data.ts` 하이드레이션 스토어 전환 (export 시그니처 유지, 엔진 5종 무수정)
+- [x] `app/company/[id]/page.tsx` 마스터 로드 3-상태 (loading/ok/error+재시도)
+- [x] `weightIncomplete` 플래그 제거 (60인박스 0.12·택배 0.44 실측 확정으로 존재 이유 소멸)
+- [x] `master.json` → 테스트 픽스처 전용 (값은 DB와 일치화, scripts/fixture.ts가 주입)
+- [x] `types/database.ts` 실컬럼 반영 + roll_box_capacities/roll_weights + GenericSchema 제약 충족
+- [x] 검증: tsc 0에러 · 회귀 134/134 (19·5·80·17·13) · JSX 가드 OK · 빌드 성공(폰트 스텁 원복)
+
+### 남은 것
+- [ ] 주식 시뮬레이션 `/api/stocks` 하드코딩 → DB 교체 (별도)
+- [ ] 예외 규칙 반영: 600M·B128 수용량, 택배 직접담기, WL919 CLEAR (DB 조사 후 엔진 확장)
 
 ---
 
@@ -325,3 +337,4 @@
 | 2026-07-02 | Phase 5-Step3-3 | 파렛트 슬롯·빈칸·오버플로우 재설계 (pallet.ts 재작성 + PalletStack 슬롯 필드 + SlotKind + CompanyPalletSvg 슬롯 렌더 + overflow 경고), 검증 80/80 + 회귀 24 | Claude Opus 4.8 |
 | 2026-07-03 | Phase 5-Step3-4 | 원단 타입 도입 + 무게 표시 분리 (fabric.ts 신규 + types/innerbox/outerbox/simulate + CompanyParams/BoxSvg/CompanyResult), 검증 17/17 + 회귀 19·5·80, 커밋 a26307a·34a44a6 | Claude Opus 4.8 |
 | 2026-07-04 | Phase 5-Step3-5 | 통합 검증 (test-step3-5 신규 13/13 + 회귀 4종 무영향 + 실브라우저 5개 항목 육안) → Phase 5 Step 3 종결 | Claude Opus 4.8 |
+| 2026-07-11 | Phase 6-Step1 | 박스 시뮬레이션 DB 전환 (roll_weights 신설 + master API + data.ts 하이드레이션 + weightIncomplete 제거), 회귀 134/134 | Claude Fable 5 |
