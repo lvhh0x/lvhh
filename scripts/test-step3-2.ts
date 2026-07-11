@@ -10,6 +10,7 @@
  *   npx ts-node -r tsconfig-paths/register --compiler-options '{"module":"commonjs"}' scripts/test-step3-2.ts
  */
 
+import '@/scripts/fixture'; // 픽스처 하이드레이션 (Phase 6 — 반드시 첫 import)
 import { PALLETS, getOuterBoxSpec } from '@/lib/company/data';
 import { calcFootprint } from '@/lib/company/overhang';
 
