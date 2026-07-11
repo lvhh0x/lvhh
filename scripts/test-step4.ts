@@ -15,6 +15,7 @@
  * 실행: npx ts-node -r tsconfig-paths/register --compiler-options '{"module":"commonjs"}' scripts/test-step4.ts
  */
 
+import '@/scripts/fixture'; // 픽스처 하이드레이션 (Phase 6 — 반드시 첫 import)
 import { simulate } from '@/lib/company/simulate';
 import { INNER_UNITS } from '@/lib/company/data';
 import type { CompanyParams, SizedInnerCount, PackedBox } from '@/types/company';
