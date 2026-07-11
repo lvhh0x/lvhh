@@ -16,6 +16,7 @@
  *     --compiler-options '{"module":"commonjs","baseUrl":"."}' scripts/test-step3-5.ts
  */
 
+import '@/scripts/fixture'; // 픽스처 하이드레이션 (Phase 6 — 반드시 첫 import)
 import { simulate } from '@/lib/company/simulate';
 import { INNER_UNITS } from '@/lib/company/data';
 import { distinctFabricsByQty } from '@/lib/company/fabric';
