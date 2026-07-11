@@ -149,18 +149,6 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
         >
           (적재물만 · 파렛트 제외)
         </div>
-        {result.weightIncomplete && (
-          <div
-            style={{
-              fontFamily: 'var(--font-manrope), sans-serif',
-              fontSize: '11px',
-              color: '#9C9486',
-              marginTop: '4px',
-            }}
-          >
-            × 60인박스·택배박스 무게 미반영 (일부 무게 과소 표시)
-          </div>
-        )}
       </div>
 
       {/* [2] 파렛트 결과 — 적재 초과 시 경고만 표시 */}
