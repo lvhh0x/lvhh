@@ -24,7 +24,7 @@ export interface InnerBoxSpec {
   w: number; // 가로 (mm)
   d: number; // 세로 (mm)
   h: number; // 높이 (mm)
-  tare: number; // 공 무게 (kg), 60인박스는 0 (미상)
+  tare: number; // 공 무게 (kg)
 }
 
 export interface OuterBoxSpec {
@@ -33,7 +33,7 @@ export interface OuterBoxSpec {
   w: number;
   d: number;
   h: number;
-  tare: number;          // 공 무게 (kg), 택배박스는 0 (미상)
+  tare: number;          // 공 무게 (kg)
   perLayerUnit: number;  // 145인박스 기준 단위값 (outer=15, courier=5)
   capacityUnit: number;  // 총 용량 단위 (outer=60, courier=12)
 }
@@ -54,6 +54,17 @@ export interface PalletSpec {
   tare: number;          // 공 무게 (kg)
   boxesPerLayer: number; // 층당 아웃박스 수
   layout: PalletLayout;  // 아웃박스 배열표 (Phase 5 Step 3 / Step 2)
+}
+
+// ─── 마스터 데이터 묶음 (Phase 6 — DB 하이드레이션 페이로드) ─────────────────────
+// /api/company/master 응답 = 이 형태. lib/company/data.ts 가 주입받아 노출한다.
+
+export interface MasterData {
+  products: ProductSpec[];
+  innerBoxes: InnerBoxSpec[];
+  outerBoxes: OuterBoxSpec[];
+  pallets: PalletSpec[];
+  innerUnits: Record<InnerBoxKind, Record<OuterBoxKind, number>>;
 }
 
 // ─── 입력 ──────────────────────────────────────────────────────────────────────
@@ -84,8 +95,8 @@ export interface InnerBoxCount {
  */
 export interface SizedInnerCount {
   fabric: string;      // 원단 타입 (제품→박스까지 passthrough) — Phase 5 Step 3-4
-  size: number;        // 제품 사이즈 (mm): 40 | 60 | 110
-  meter: number;       // 제품 미터 (m): 300
+  size: number;        // 제품 사이즈 (mm)
+  meter: number;       // 제품 미터 (m)
   kind: InnerBoxKind;  // 인박스 종류: 145 | 95 | 60
   count: number;       // 이 사이즈+종류 인박스 개수
   productQty: number;  // 이 인박스들에 담긴 제품 개수 (= count × innerCapacity[kind])
@@ -133,5 +144,4 @@ export interface CompanyResult {
   looseCount: number;             // 낱개 수
   totalWeight: number;            // 전체 무게 합 (제품+인박스+아웃박스+파렛트)
   pallet: PalletStack | null;
-  weightIncomplete: boolean;      // 60인박스 또는 택배박스 포함 시 무게 과소 표시 안내
 }
