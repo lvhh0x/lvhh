@@ -1,6 +1,6 @@
 {
   "_rules": {
-    "설명": "MERIDIAN 회사 시뮬레이션 마스터 데이터. 값을 바꿀 때는 반드시 이 파일에서만 바꾼다 (single source of truth). data.ts가 이 JSON을 읽어 타입을 입혀 재노출한다.",
+    "설명": "테스트 픽스처 전용 (Phase 6). 운영 데이터의 유일한 진실은 Supabase DB이며, 이 파일은 scripts/ 검증 스크립트가 hydrateMasterData()로 주입하는 고정 데이터다. DB 값과 일치하도록 유지한다 (2026-07-11 실측 확정값 반영).",
     "단위표_규칙": {
       "아웃박스_총용량단위": 60,
       "택배박스_총용량단위": 12,
@@ -14,7 +14,7 @@
         "택배박스(12)": ["95x4=12", "145x2=10(남음)", "145x1+95x2=11(남음)", "95x3=9(남음)"]
       }
     },
-    "무게_규칙": "제품 1개 무게는 모름. 풀 아웃박스 총무게에서 tare(아웃박스0.5 + 145인박스0.22x4)를 빼고 풀수량으로 나눠 역산. 60인박스/택배박스 tare는 미상이라 0 placeholder → weightIncomplete 플래그.",
+    "무게_규칙": "제품 1개 무게는 모름. 풀 아웃박스 총무게에서 tare(아웃박스0.5 + 145인박스0.22x4)를 빼고 풀수량으로 나눠 역산. 모든 tare는 실측 확정 (2026-07-11).",
     "단위_주의": "수량(제품 개수)과 단위(unit)는 다르다. 예: 40사이즈 제품 30개 = 145인박스 1개 = 15단위."
   },
 
@@ -27,20 +27,20 @@
   "innerBoxes": [
     { "kind": 145, "w": 340, "d": 150, "h": 150, "tare": 0.22 },
     { "kind": 95,  "w": 340, "d": 150, "h": 95,  "tare": 0.16 },
-    { "kind": 60,  "w": 340, "d": 150, "h": 60,  "tare": 0.00 }
+    { "kind": 60,  "w": 340, "d": 150, "h": 60,  "tare": 0.12 }
   ],
 
   "outerBoxes": [
     { "kind": "outer",   "label": "아웃박스", "w": 355, "d": 315, "h": 315, "tare": 0.50, "perLayerUnit": 15, "capacityUnit": 60 },
-    { "kind": "courier", "label": "택배박스", "w": 315, "d": 315, "h": 215, "tare": 0.00, "perLayerUnit": 5,  "capacityUnit": 12 }
+    { "kind": "courier", "label": "택배박스", "w": 355, "d": 315, "h": 215, "tare": 0.44, "perLayerUnit": 5,  "capacityUnit": 12 }
   ],
 
   "pallets": [
     { "id": "700-wood",       "label": "700파렛트 (나무)",   "w": 710,  "d": 750,  "h": 140, "tare": 9.0,  "boxesPerLayer": 4, "layout": { "cols": 2, "rows": 2, "rotated": false } },
     { "id": "900-wood",       "label": "900파렛트 (나무)",   "w": 900,  "d": 710,  "h": 140, "tare": 12.4, "boxesPerLayer": 6, "layout": { "cols": 3, "rows": 2, "rotated": true } },
     { "id": "1100-wood",      "label": "1100파렛트 (나무)",  "w": 1100, "d": 1100, "h": 190, "tare": 23.3, "boxesPerLayer": 9, "layout": { "cols": 3, "rows": 3, "rotated": false } },
-    { "id": "1100-plastic-a", "label": "A 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 10.5, "boxesPerLayer": 9, "layout": { "cols": 3, "rows": 3, "rotated": false } },
-    { "id": "1100-plastic-b", "label": "B 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 18.5, "boxesPerLayer": 9, "layout": { "cols": 3, "rows": 3, "rotated": false } }
+    { "id": "1100-plastic-a", "label": "A 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 18.5, "boxesPerLayer": 9, "layout": { "cols": 3, "rows": 3, "rotated": false } },
+    { "id": "1100-plastic-b", "label": "B 플라스틱 파렛트", "w": 1100, "d": 1100, "h": 155, "tare": 10.5, "boxesPerLayer": 9, "layout": { "cols": 3, "rows": 3, "rotated": false } }
   ],
 
   "innerUnits": {
