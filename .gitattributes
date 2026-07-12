@@ -1,0 +1,2 @@
+# git 훅은 sh 스크립트 — CRLF로 체크아웃되면 실행 불가, LF 고정
+.githooks/* text eol=lf
