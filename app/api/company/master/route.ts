@@ -2,9 +2,9 @@
 // 4테이블(inner/outer/pallet + roll_box_capacities/roll_weights)을 조회해
 // MasterData 형태로 조립한다. 화면은 이 응답을 hydrateMasterData()로 주입한다.
 //
-// 제품 노출 규칙: roll_box_capacities(기본 규칙, ribbon_type_id NULL)와
-// roll_weights(실측 무게)가 모두 있는 (폭, 길이)만 제품으로 노출한다.
-// → roll_weights 에 행을 추가하면 그 사이즈가 웹에 자동 등장 (점진 확장).
+// 제품 노출 규칙: roll_box_capacities(기본 규칙, ribbon_type_id NULL)에 있는
+// (폭, 길이)는 모두 제품으로 노출한다. roll_weights(실측 무게)는 선택 —
+// 없으면 fullOuterWeight=null (박스 계산은 가능, 무게 표시만 생략).
 //
 // fullOuterQty 는 저장하지 않고 계산한다:
 //   기본 인박스 수용량 × (아웃박스 총용량단위 ÷ 해당 인박스 outer_unit)
@@ -135,7 +135,7 @@ export async function GET() {
   }
   if (pallets.length === 0) return fail('pallet_types 비어 있음');
 
-  // ── 제품: 수용량(기본 규칙) ∩ 실측 무게 ────────────────────────
+  // ── 제품: 수용량(기본 규칙) — 무게는 선택 ────────────────────────
   type Group = {
     size: number;
     meter: number;
@@ -168,8 +168,6 @@ export async function GET() {
 
   const products: ProductSpec[] = [];
   for (const [key, g] of Array.from(groups.entries())) {
-    const fullOuterWeight = weights.get(key);
-    if (fullOuterWeight === undefined) continue; // 무게 미조사 사이즈는 아직 미노출
     const defaultKind = g.defaultKind;
     if (defaultKind === null) return fail(`기본 인박스 미지정: ${g.size}×${g.meter}`);
     const defaultQty = g.innerCapacity[defaultKind];
@@ -179,11 +177,14 @@ export async function GET() {
       size: g.size,
       meter: g.meter,
       fullOuterQty: defaultQty * perOuter,
-      fullOuterWeight,
+      // 무게 미실측 사이즈도 노출 (박스 계산 우선 — 사용자 결정 2026-07-12).
+      // 무게는 있을 때만 표시하고, roll_weights 에 행이 추가되면 자동 반영된다.
+      fullOuterWeight: weights.get(key) ?? null,
+      defaultInner: defaultKind,
       innerCapacity: g.innerCapacity,
     });
   }
-  if (products.length === 0) return fail('노출 가능한 제품 없음 (수용량∩무게 데이터 확인)');
+  if (products.length === 0) return fail('노출 가능한 제품 없음 (수용량 데이터 확인)');
   products.sort((a, b) => a.size - b.size || a.meter - b.meter);
 
   const data: MasterData = {

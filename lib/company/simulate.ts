@@ -61,10 +61,16 @@ export function simulate(params: CompanyParams): SimulateOutcome {
 
   const { outerCount, courierCount, looseCount } = countOuterBoxes(boxes);
 
-  const productWeight = validInputs.reduce(
-    (acc, input) => acc + calcProductWeight(input),
-    0,
-  );
+  // 제품 무게 합 — 무게 미실측 제품이 하나라도 있으면 null (박스 계산은 그대로 진행)
+  let productWeight: number | null = 0;
+  for (const input of validInputs) {
+    const w = calcProductWeight(input);
+    if (w === null) {
+      productWeight = null;
+      break;
+    }
+    productWeight += w;
+  }
   const innerTare = calcInnerBoxTare(innerTotals);
   const outerTare = calcOuterBoxTare(boxes);
 
@@ -73,7 +79,8 @@ export function simulate(params: CompanyParams): SimulateOutcome {
   if (params.palletId) {
     const palletSpec = findPallet(params.palletId);
     if (palletSpec) {
-      const stackWeight = productWeight + innerTare + outerTare;
+      const stackWeight =
+        productWeight === null ? null : productWeight + innerTare + outerTare;
       pallet = calcPallet({ outerCount, courierCount, looseCount }, palletSpec, stackWeight);
       if (pallet) {
         palletTare = palletSpec.tare; // 파렛트 1개
@@ -87,7 +94,8 @@ export function simulate(params: CompanyParams): SimulateOutcome {
     }
   }
 
-  const totalWeight = productWeight + innerTare + outerTare + palletTare;
+  const totalWeight =
+    productWeight === null ? null : productWeight + innerTare + outerTare + palletTare;
 
   const result: CompanyResult = {
     innerTotals,

@@ -15,7 +15,8 @@ export interface ProductSpec {
   size: number;            // 사이즈 (mm), 예: 40
   meter: number;           // 미터 (m), 예: 300
   fullOuterQty: number;    // 풀 아웃박스 제품 수량, 예: 120
-  fullOuterWeight: number; // 풀 아웃박스 총 무게 (kg), 예: 15.92
+  fullOuterWeight: number | null; // 풀 아웃박스 총 무게 (kg), null=미실측 (박스 계산은 가능)
+  defaultInner: InnerBoxKind;     // 기본 인박스 종류 (무게 역산·수량 계산 기준)
   innerCapacity: Record<InnerBoxKind, number | null>; // 인박스별 용량, null=미지원
 }
 
@@ -74,6 +75,10 @@ export interface ProductInput {
   size: number;   // 사이즈 (mm)
   meter: number;  // 미터 (m)
   qty: number;    // 수량 (개)
+  // 포장 속성 (표시용 — 계산 미관여, 추후 예외규칙 연동 예정) — Phase 6
+  leaderTrailer?: string;   // 리더트레일러 (기본 AA)
+  coreType?: string;        // 코아타입 (기본 1FC)
+  packMode?: 'out' | 'in';  // Out/In (기본 out)
 }
 
 export interface CompanyParams {
@@ -127,7 +132,7 @@ export interface PalletStack {
   layers: number;           // 층수 = ceil(필요슬롯 / boxesPerLayer)
   lastLayerSlots: number;   // 마지막(맨 위) 층이 실제 차지한 슬롯 수
   height: number;           // 파렛트 높이 + 아웃박스 높이(315) × 층수 (mm)
-  weight: number;           // 파렛트 tare + 적재물 무게 합 (kg)
+  weight: number | null;    // 파렛트 tare + 적재물 무게 합 (kg) · null=무게 미실측 제품 포함
   footprintW: number;       // 파렛트+아웃박스 합산 외곽 가로 (mm) — Phase 5 Step 3/Step 2
   footprintD: number;       // 파렛트+아웃박스 합산 외곽 세로 (mm)
   overhangW: number;        // 가로 오버행 (mm, 0이면 없음)
@@ -142,6 +147,6 @@ export interface CompanyResult {
   outerCount: number;             // 아웃박스 수
   courierCount: number;           // 택배박스 수
   looseCount: number;             // 낱개 수
-  totalWeight: number;            // 전체 무게 합 (제품+인박스+아웃박스+파렛트)
+  totalWeight: number | null;     // 전체 무게 합 (제품+인박스+아웃박스+파렛트) · null=무게 미실측 제품 포함
   pallet: PalletStack | null;
 }

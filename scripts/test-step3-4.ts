@@ -131,14 +131,22 @@ function run(params: CompanyParams) {
   const noPallet = run({ products, palletId: null });
   const withPallet = run({ products, palletId: '900-wood' });
   const palletTare = findPallet('900-wood')!.tare; // 12.4
-  const delta = withPallet.totalWeight - noPallet.totalWeight;
 
-  check('D 총무게 증분 = 파렛트tare', approx(delta, palletTare),
-    `delta=${delta.toFixed(2)} tare=${palletTare}`);
-  check('D pallet.weight == totalWeight', !!withPallet.pallet && approx(withPallet.pallet.weight, withPallet.totalWeight),
-    withPallet.pallet ? `${withPallet.pallet.weight.toFixed(2)}=${withPallet.totalWeight.toFixed(2)}` : 'no pallet');
-  check('D 적재무게 = 총 − 파렛트 (양수)', withPallet.totalWeight - palletTare > 0,
-    `load=${(withPallet.totalWeight - palletTare).toFixed(2)}`);
+  // Phase 6: totalWeight/pallet.weight 는 무게 미실측 시 null — 실측 제품(110)이므로 반드시 존재해야 한다.
+  const twNo = noPallet.totalWeight;
+  const twWith = withPallet.totalWeight;
+  const pw = withPallet.pallet ? withPallet.pallet.weight : null;
+  check('D 무게 산출(null 아님)', twNo !== null && twWith !== null && pw !== null,
+    `no=${twNo} with=${twWith} pallet=${pw}`);
+  if (twNo !== null && twWith !== null && pw !== null) {
+    const delta = twWith - twNo;
+    check('D 총무게 증분 = 파렛트tare', approx(delta, palletTare),
+      `delta=${delta.toFixed(2)} tare=${palletTare}`);
+    check('D pallet.weight == totalWeight', approx(pw, twWith),
+      `${pw.toFixed(2)}=${twWith.toFixed(2)}`);
+    check('D 적재무게 = 총 − 파렛트 (양수)', twWith - palletTare > 0,
+      `load=${(twWith - palletTare).toFixed(2)}`);
+  }
 }
 
 // ─── E. 균일 원단 relabel == '미지정' (grouping 동일 시 passthrough) ───────────
@@ -146,13 +154,16 @@ function run(params: CompanyParams) {
   const base: [string, number, number][] = [['', 40, 210], ['', 60, 100]];
   const a = run({ products: base.map(([, s, q]) => P('미지정', s, q)), palletId: '1100-wood' });
   const b = run({ products: base.map(([, s, q]) => P('B999', s, q)), palletId: '1100-wood' });
+  const twA = a.totalWeight;
+  const twB = b.totalWeight;
   const same =
     a.outerCount === b.outerCount &&
     a.courierCount === b.courierCount &&
     a.looseCount === b.looseCount &&
-    approx(a.totalWeight, b.totalWeight);
+    twA !== null && twB !== null &&
+    approx(twA, twB);
   check('E 균일 원단 = 미지정 동일결과', same,
-    `A(o${a.outerCount}/c${a.courierCount}/l${a.looseCount}/${a.totalWeight.toFixed(2)}) B(o${b.outerCount}/c${b.courierCount}/l${b.looseCount}/${b.totalWeight.toFixed(2)})`);
+    `A(o${a.outerCount}/c${a.courierCount}/l${a.looseCount}/${twA?.toFixed(2)}) B(o${b.outerCount}/c${b.courierCount}/l${b.looseCount}/${twB?.toFixed(2)})`);
 }
 
 // ─── 요약 ─────────────────────────────────────────────────────────────────────

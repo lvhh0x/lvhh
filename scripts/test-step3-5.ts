@@ -132,13 +132,16 @@ function run(params: CompanyParams): CompanyResult {
   // relabel 무영향: S1의 두 원단을 이름만 바꿔도(distinct 관계 유지) 개수·무게 동일
   const orig = run({ products: [P('B220', 40, 60), P('B324', 60, 20)], palletId: '900-wood' });
   const relabeled = run({ products: [P('X1', 40, 60), P('Y2', 60, 20)], palletId: '900-wood' });
+  const twO = orig.totalWeight;
+  const twR = relabeled.totalWeight;
   const same =
     orig.outerCount === relabeled.outerCount &&
     orig.courierCount === relabeled.courierCount &&
     orig.looseCount === relabeled.looseCount &&
-    approx(orig.totalWeight, relabeled.totalWeight);
+    twO !== null && twR !== null &&
+    approx(twO, twR);
   check('S4 원단 relabel 무영향(개수·무게 동일)', same,
-    `orig(o${orig.outerCount}/${orig.totalWeight.toFixed(2)}) relabel(o${relabeled.outerCount}/${relabeled.totalWeight.toFixed(2)})`);
+    `orig(o${orig.outerCount}/${twO?.toFixed(2)}) relabel(o${relabeled.outerCount}/${twR?.toFixed(2)})`);
 
   // 오버행 구조값: 700=0, 900=45 (원단·수량과 무관하게 파렛트 layout에서 결정)
   const p700 = run({ products: [P('B220', 110, 800)], palletId: '700-wood' }).pallet;

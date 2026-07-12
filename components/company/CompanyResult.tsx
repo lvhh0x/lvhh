@@ -53,8 +53,6 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
         <p style={{ fontFamily: 'var(--font-manrope), sans-serif', fontSize: '13px', margin: 0, lineHeight: 1.6 }}>
           지원하지 않는 제품입니다:{' '}
           {unsupported.map(u => `${u.size}×${u.meter}`).join(', ')}
-          <br />
-          (현재 지원: 40×300, 60×300, 110×300)
         </p>
       </div>
     );
@@ -74,8 +72,10 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
   const palletSpec = pallet ? findPallet(pallet.palletId) : null;
 
   // 무게 표시 분리 (Phase 5 Step 3-4): 값 계산은 엔진 그대로, 여기선 적재/파렛트로 역산만.
+  // 무게 미실측 제품 포함 시 totalWeight=null → 무게 줄 자체를 생략 (Phase 6).
   const palletTare = palletSpec ? palletSpec.tare : 0;
-  const loadWeight = result.totalWeight - palletTare; // 적재물(짐)만
+  const loadWeight =
+    result.totalWeight === null ? null : result.totalWeight - palletTare; // 적재물(짐)만
 
   return (
     <div>
@@ -129,26 +129,30 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
           ))}
         </div>
 
-        {/* 무게 */}
-        <div
-          style={{
-            fontFamily: 'var(--font-jetbrains-mono), monospace',
-            fontSize: '14px',
-            color: '#DCC08A',
-          }}
-        >
-          적재 무게 {loadWeight.toFixed(2)} kg
-        </div>
-        <div
-          style={{
-            fontFamily: 'var(--font-manrope), sans-serif',
-            fontSize: '10px',
-            color: '#8c7a55',
-            marginTop: '2px',
-          }}
-        >
-          (적재물만 · 파렛트 제외)
-        </div>
+        {/* 무게 — 미실측 제품 포함 시 생략 */}
+        {loadWeight !== null && (
+          <>
+            <div
+              style={{
+                fontFamily: 'var(--font-jetbrains-mono), monospace',
+                fontSize: '14px',
+                color: '#DCC08A',
+              }}
+            >
+              적재 무게 {loadWeight.toFixed(2)} kg
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-manrope), sans-serif',
+                fontSize: '10px',
+                color: '#8c7a55',
+                marginTop: '2px',
+              }}
+            >
+              (적재물만 · 파렛트 제외)
+            </div>
+          </>
+        )}
       </div>
 
       {/* [2] 파렛트 결과 — 적재 초과 시 경고만 표시 */}
@@ -199,11 +203,15 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
                 )}
               </div>
             )}
-            <div>적재 무게: {loadWeight.toFixed(2)} kg</div>
-            <div>파렛트 무게: {palletTare.toFixed(2)} kg</div>
-            <div style={{ color: '#DCC08A' }}>
-              총 무게: {result.totalWeight.toFixed(2)} kg
-            </div>
+            {loadWeight !== null && result.totalWeight !== null && (
+              <>
+                <div>적재 무게: {loadWeight.toFixed(2)} kg</div>
+                <div>파렛트 무게: {palletTare.toFixed(2)} kg</div>
+                <div style={{ color: '#DCC08A' }}>
+                  총 무게: {result.totalWeight.toFixed(2)} kg
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -17,6 +17,7 @@ const fixture: MasterData = {
     meter: p.meter,
     fullOuterQty: p.fullOuterQty,
     fullOuterWeight: p.fullOuterWeight,
+    defaultInner: p.defaultInner as InnerBoxKind,
     innerCapacity: {
       145: p.innerCapacity['145'],
       95: p.innerCapacity['95'],

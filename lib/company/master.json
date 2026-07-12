@@ -14,14 +14,14 @@
         "택배박스(12)": ["95x4=12", "145x2=10(남음)", "145x1+95x2=11(남음)", "95x3=9(남음)"]
       }
     },
-    "무게_규칙": "제품 1개 무게는 모름. 풀 아웃박스 총무게에서 tare(아웃박스0.5 + 145인박스0.22x4)를 빼고 풀수량으로 나눠 역산. 모든 tare는 실측 확정 (2026-07-11).",
+    "무게_규칙": "제품 1개 무게는 모름. 풀 아웃박스 총무게에서 tare(아웃박스0.5 + 기본인박스 tare×아웃박스당개수)를 빼고 풀수량으로 나눠 역산. 무게 미실측 사이즈는 fullOuterWeight=null(박스 계산만). 모든 tare는 실측 확정 (2026-07-11).",
     "단위_주의": "수량(제품 개수)과 단위(unit)는 다르다. 예: 40사이즈 제품 30개 = 145인박스 1개 = 15단위."
   },
 
   "products": [
-    { "size": 40,  "meter": 300, "fullOuterQty": 120, "fullOuterWeight": 15.92, "innerCapacity": { "145": 30, "95": 20, "60": 10 } },
-    { "size": 60,  "meter": 300, "fullOuterQty": 80,  "fullOuterWeight": 15.80, "innerCapacity": { "145": 20, "95": 10, "60": null } },
-    { "size": 110, "meter": 300, "fullOuterQty": 40,  "fullOuterWeight": 15.00, "innerCapacity": { "145": 10, "95": null, "60": null } }
+    { "size": 40,  "meter": 300, "fullOuterQty": 120, "fullOuterWeight": 15.92, "defaultInner": 145, "innerCapacity": { "145": 30, "95": 20, "60": 10 } },
+    { "size": 60,  "meter": 300, "fullOuterQty": 80,  "fullOuterWeight": 15.80, "defaultInner": 145, "innerCapacity": { "145": 20, "95": 10, "60": null } },
+    { "size": 110, "meter": 300, "fullOuterQty": 40,  "fullOuterWeight": 15.00, "defaultInner": 145, "innerCapacity": { "145": 10, "95": null, "60": null } }
   ],
 
   "innerBoxes": [

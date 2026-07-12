@@ -38,12 +38,12 @@ export function slotKindAt(
  * 아웃/택배/낱개를 파렛트 1개에 슬롯 환산해 적재.
  * @param counts     아웃박스·택배·낱개 개수
  * @param pallet     선택 파렛트
- * @param stackWeight 적재물 무게 합 (kg) — weight.ts에서 계산해 전달
+ * @param stackWeight 적재물 무게 합 (kg) — weight.ts에서 계산해 전달. null=무게 미실측
  */
 export function calcPallet(
   counts: OuterBoxCounts,
   pallet: PalletSpec,
-  stackWeight: number,
+  stackWeight: number | null,
 ): PalletStack | null {
   const slotOuter = counts.outerCount;
   const slotCourier = counts.courierCount;
@@ -60,7 +60,7 @@ export function calcPallet(
   const lastLayerSlots = neededSlots - bpl * (layers - 1);
 
   const height = pallet.h + OUTER_BOX_HEIGHT * layers;
-  const weight = pallet.tare + stackWeight; // 파렛트 1개
+  const weight = stackWeight === null ? null : pallet.tare + stackWeight; // 파렛트 1개
 
   return {
     palletId: pallet.id,

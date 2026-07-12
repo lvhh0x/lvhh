@@ -1,6 +1,7 @@
-// 엔진④ — 무게 계산 (Phase 5 Step 1)
-// 규칙 (계획서 3.6):
-//   제품1개무게 = (아웃박스총무게 − 아웃박스tare 0.5 − 145tare 0.22 × 4) ÷ 풀수량
+// 엔진④ — 무게 계산 (Phase 5 Step 1 · Phase 6 일반화)
+// 규칙 (계획서 3.6, Phase 6 확장):
+//   제품1개무게 = (아웃박스총무게 − 아웃박스tare − 기본인박스tare × 아웃박스당개수) ÷ 풀수량
+//   tare·개수는 하이드레이션된 마스터 데이터(단일 출처)에서 읽는다.
 //
 //   총무게 = Σ(제품무게 × 수량)
 //          + Σ(인박스 tare: 145=0.22, 95=0.16, 60=0)
@@ -15,29 +16,35 @@ import type {
   InnerBoxCount,
   PackedBox,
 } from '@/types/company';
-import { getInnerBoxSpec, getOuterBoxSpec, findProduct } from './data';
-
-const OUTER_TARE = 0.5;   // 아웃박스 tare
-const INNER145_TARE = 0.22;
-const FULL_INNER145_COUNT = 4; // 꽉 찬 아웃박스 = 145인박스 4개
+import { getInnerBoxSpec, getOuterBoxSpec, findProduct, INNER_UNITS } from './data';
 
 /**
  * 제품 1개 무게 (kg) — 꽉 찬 아웃박스 무게에서 tare 역산.
+ * 제품의 기본 인박스 종류(defaultInner) 기준으로 인박스 tare 개수를 계산한다.
+ *   예: 40(145박스) = (W − 0.5 − 0.22×4) ÷ 120 / 70(95박스) = (W − 0.5 − 0.16×6) ÷ 60
+ * 무게 미실측(fullOuterWeight=null) 제품은 null.
  */
-export function productUnitWeight(product: ProductSpec): number {
+export function productUnitWeight(product: ProductSpec): number | null {
+  if (product.fullOuterWeight === null) return null;
+  const outer = getOuterBoxSpec('outer');
+  const inner = getInnerBoxSpec(product.defaultInner);
+  const innersPerOuter = outer.capacityUnit / INNER_UNITS[product.defaultInner].outer;
   return (
-    (product.fullOuterWeight - OUTER_TARE - INNER145_TARE * FULL_INNER145_COUNT) /
+    (product.fullOuterWeight - outer.tare - inner.tare * innersPerOuter) /
     product.fullOuterQty
   );
 }
 
 /**
  * 제품 입력 1행의 제품 무게 합 (제품 본체만, 박스 제외).
+ * 무게 미실측 제품 포함 시 null.
  */
-export function calcProductWeight(input: ProductInput): number {
+export function calcProductWeight(input: ProductInput): number | null {
   const product = findProduct(input.size, input.meter);
   if (!product) return 0;
-  return productUnitWeight(product) * input.qty;
+  const unit = productUnitWeight(product);
+  if (unit === null) return null;
+  return unit * input.qty;
 }
 
 /**

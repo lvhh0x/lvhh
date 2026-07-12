@@ -1,11 +1,11 @@
 'use client';
 
 // 회사 시뮬레이션 입력 패널 (Client Component) — Phase 5 Step 1
-// 제품 행(사이즈/미터/수량) 다중 입력 + 파렛트 선택 + 실행.
+// 제품 행(사이즈/미터/수량 + 포장속성) 다중 입력 + 파렛트 선택 + 실행.
 
 import { useState } from 'react';
 import type { ProductInput, CompanyParams as CompanyParamsType } from '@/types/company';
-import { PALLETS, PRODUCTS } from '@/lib/company/data';
+import { PALLETS } from '@/lib/company/data';
 import { normalizeFabric } from '@/lib/company/fabric';
 
 interface Props {
@@ -18,9 +18,24 @@ interface RowState {
   size: string;
   meter: string;
   qty: string;
+  leaderTrailer: string;    // 기본 AA
+  coreType: string;         // 기본 1FC
+  packMode: 'out' | 'in';   // 기본 out
 }
 
-const EMPTY_ROW: RowState = { fabric: '', size: '', meter: '', qty: '' };
+// 포장 속성 선택지 (표시용 — 계산 미관여, Phase 6)
+const LEADER_TRAILERS = ['AA', 'AC', 'CC', 'CA', 'AN'];
+const CORE_TYPES = ['1FC', '0FC', '1FP', 'BFP', 'BFC', '67C', '9FC', '4FC'];
+
+const EMPTY_ROW: RowState = {
+  fabric: '',
+  size: '',
+  meter: '',
+  qty: '',
+  leaderTrailer: 'AA',
+  coreType: '1FC',
+  packMode: 'out',
+};
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -32,6 +47,21 @@ const inputStyle: React.CSSProperties = {
   fontFamily: 'var(--font-jetbrains-mono), monospace',
   fontSize: '13px',
   outline: 'none',
+};
+
+// 속성 행(원단·리더·코아·포장) 전용 — 4분할에 맞춘 축소형
+const compactInputStyle: React.CSSProperties = {
+  width: '100%',
+  background: 'rgba(20,17,14,0.6)',
+  border: '1px solid rgba(201,168,106,0.2)',
+  borderRadius: '2px',
+  padding: '6px 6px',
+  color: '#E8E0D2',
+  fontFamily: 'var(--font-jetbrains-mono), monospace',
+  fontSize: '11px',
+  outline: 'none',
+  height: '30px',
+  boxSizing: 'border-box',
 };
 
 const labelStyle: React.CSSProperties = {
@@ -47,7 +77,7 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
   const [rows, setRows] = useState<RowState[]>([{ ...EMPTY_ROW }]);
   const [palletId, setPalletId] = useState<string>('');
 
-  function updateRow(idx: number, key: keyof RowState, value: string) {
+  function updateRow<K extends keyof RowState>(idx: number, key: K, value: RowState[K]) {
     setRows(prev =>
       prev.map((r, i) => (i === idx ? { ...r, [key]: value } : r)),
     );
@@ -68,6 +98,9 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
         size: Number(r.size),
         meter: Number(r.meter),
         qty: Number(r.qty),
+        leaderTrailer: r.leaderTrailer,
+        coreType: r.coreType,
+        packMode: r.packMode,
       }))
       .filter(p => p.size > 0 && p.meter > 0 && p.qty > 0);
 
@@ -99,17 +132,7 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
       >
         제품 입력
       </h2>
-      <p
-        style={{
-          fontFamily: 'system-ui, sans-serif',
-          fontSize: '11px',
-          color: '#9C9486',
-          margin: '0 0 18px',
-          lineHeight: 1.5,
-        }}
-      >
-        지원 제품: {PRODUCTS.map(p => `${p.size}×${p.meter}`).join(', ')}
-      </p>
+      <div style={{ height: '12px' }} />
 
       {/* 제품 행들 */}
       {rows.map((row, idx) => (
@@ -124,16 +147,6 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
                 : 'none',
           }}
         >
-          <div style={{ marginBottom: '8px' }}>
-            <label style={labelStyle}>원단</label>
-            <input
-              type="text"
-              value={row.fabric}
-              onChange={e => updateRow(idx, 'fabric', e.target.value)}
-              placeholder="B220 (미입력 시 미지정)"
-              style={inputStyle}
-            />
-          </div>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>사이즈</label>
@@ -158,7 +171,7 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
               />
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', marginBottom: '8px' }}>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>수량</label>
               <input
@@ -190,6 +203,65 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
                 ×
               </button>
             )}
+          </div>
+          {/* 포장 속성 (표시용) — 원단 · 리더트레일러 · 코아 · Out/In */}
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label style={labelStyle}>원단</label>
+              <input
+                type="text"
+                value={row.fabric}
+                onChange={e => updateRow(idx, 'fabric', e.target.value)}
+                placeholder="미지정"
+                style={compactInputStyle}
+              />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label style={labelStyle}>리더</label>
+              <select
+                value={row.leaderTrailer}
+                onChange={e => updateRow(idx, 'leaderTrailer', e.target.value)}
+                style={{ ...compactInputStyle, cursor: 'pointer' }}
+              >
+                {LEADER_TRAILERS.map(v => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label style={labelStyle}>코아</label>
+              <select
+                value={row.coreType}
+                onChange={e => updateRow(idx, 'coreType', e.target.value)}
+                style={{ ...compactInputStyle, cursor: 'pointer' }}
+              >
+                {CORE_TYPES.map(v => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label style={labelStyle}>포장</label>
+              <button
+                type="button"
+                onClick={() =>
+                  updateRow(idx, 'packMode', row.packMode === 'out' ? 'in' : 'out')
+                }
+                aria-label="Out/In 전환"
+                style={{
+                  ...compactInputStyle,
+                  cursor: 'pointer',
+                  color: row.packMode === 'out' ? '#C9A86A' : '#E8E0D2',
+                  textAlign: 'center',
+                }}
+              >
+                {row.packMode === 'out' ? 'OUT' : 'IN'}
+              </button>
+            </div>
           </div>
         </div>
       ))}
