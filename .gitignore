@@ -26,6 +26,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# claude code (로컬 전용 메모)
+CLAUDE.local.md
+
 # vercel
 .vercel
 
