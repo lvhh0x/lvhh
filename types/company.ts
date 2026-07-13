@@ -12,6 +12,10 @@ export type OuterBoxKind = 'outer' | 'courier'; // 아웃박스 / 택배박스
 // ─── 마스터 데이터 ─────────────────────────────────────────────────────────────
 
 export interface ProductSpec {
+  // 원단별로 수용량이 다르다(예: 40×300 = 공통 30 / P-110 24).
+  // 따라서 스펙 키는 (원단, 사이즈, 미터)다. null = 원단 무관 공통 규칙 —
+  // 원단 미지정('미상') 입력이 이 행으로 계산된다. (Phase 6 — 특수 원단 노출)
+  fabric: string | null;
   size: number;            // 사이즈 (mm), 예: 40
   meter: number;           // 미터 (m), 예: 300
   fullOuterQty: number;    // 풀 아웃박스 제품 수량, 예: 120
@@ -66,6 +70,8 @@ export interface MasterData {
   outerBoxes: OuterBoxSpec[];
   pallets: PalletSpec[];
   innerUnits: Record<InnerBoxKind, Record<OuterBoxKind, number>>;
+  /** `"${size}_${meter}"` → 그 치수에 존재하는 원단 코드 목록 (입력폼 드롭다운 출처) */
+  fabricsByDim: Record<string, string[]>;
 }
 
 // ─── 입력 ──────────────────────────────────────────────────────────────────────

@@ -31,6 +31,9 @@ export default function CompanyRunPage({ params }: PageProps) {
   const [unsupported, setUnsupported] = useState<
     { size: number; meter: number }[] | null
   >(null);
+  const [ambiguous, setAmbiguous] = useState<
+    { size: number; meter: number }[] | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const loadMaster = useCallback(async () => {
@@ -54,6 +57,7 @@ export default function CompanyRunPage({ params }: PageProps) {
     setIsLoading(true);
     setResult(null);
     setUnsupported(null);
+    setAmbiguous(null);
     // 850ms 연출 (주식 화면과 동일 UX)
     setTimeout(() => {
       const outcome = simulate(p);
@@ -61,6 +65,7 @@ export default function CompanyRunPage({ params }: PageProps) {
         setResult(outcome.result);
       } else {
         setUnsupported(outcome.unsupported);
+        setAmbiguous(outcome.ambiguous);
       }
       setIsLoading(false);
     }, 850);
@@ -159,6 +164,7 @@ export default function CompanyRunPage({ params }: PageProps) {
                 result={result}
                 isLoading={isLoading}
                 unsupported={unsupported}
+                ambiguous={ambiguous}
               />
             </div>
           </div>

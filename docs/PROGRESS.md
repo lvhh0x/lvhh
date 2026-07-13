@@ -284,7 +284,34 @@
 - [x] `types/database.ts` 실컬럼 반영 + roll_box_capacities/roll_weights + GenericSchema 제약 충족
 - [x] 검증: tsc 0에러 · 회귀 134/134 (19·5·80·17·13) · JSX 가드 OK · 빌드 성공(폰트 스텁 원복)
 
+### Step 2 — 특수 원단 노출 + 원단 드롭다운 ✅ (세션: DB데이타추가, 2026-07-13)
+- [x] **계약 변경**: 수용량이 원단마다 다르다(40×300 = 공통 30 / P-110 24). 스펙 키를
+      (사이즈, 미터) → **(원단, 사이즈, 미터)** 로 확장. 원단은 표시용이 아니라 계산 입력
+- [x] `ProductSpec.fabric` 추가 (null = 원단 무관 공통 규칙) · `MasterData.fabricsByDim` 추가
+- [x] `findProduct(fabric, size, meter)` — 원단 전용 → 없으면 공통 폴백
+- [x] API `IS NULL` 필터 제거 → 특수 원단 노출. 제품 **20치수 → 80치수**(원단×치수 109조합)
+- [x] **공통 스펙 합성**: 공통 규칙이 없어도 그 치수 원단들이 수용량에 전원 합의하면 미상 계산 허용(50건)
+- [x] **미상 거부**: 합의가 깨지는 10치수는 원단을 특정해야 계산 (`SimulateError.ambiguous`)
+      — 추측해서 틀린 박스 수를 내놓지 않는다 (사용자 결정)
+- [x] "없는 스펙"(unsupported)과 "원단 특정 필요"(ambiguous)를 다른 메시지로 분리
+- [x] 입력폼 원단: 자유입력 → **드롭다운**(사이즈·미터 연동, 미선택 = 미지정)
+- [x] DB: 특수 원단 89치수 `is_default`(기본 인박스) 지정 — 없으면 API가 전량 실패했다
+- [x] DB: 200×300 완성형 보충 (주력 5종) — `roll_box_capacities`에 실재하는 표준 폭이었음
+- [x] **무게 버그 수정**: 무게를 (사이즈,미터)로만 찾아 모든 원단에 같은 값을 물렸다.
+      한 박스에 들어가는 롤 수가 다르면(120 vs 96) 풀박스 무게가 같을 수 없다 →
+      (원단,사이즈,미터)로 조회, 없으면 null(미실측)
+- [x] `types/database.ts` + ribbon_types/ribbon_specs Row 타입 (`as` 우회 없음)
+- [x] 규칙 보류 처리: 리본/라벨 "절대 수정 금지" 목록은 **만드는 단계에선 족쇄** →
+      삭제 않고 주석 보류, 완성 후 되살림. `DB-02-rls-plan.md`의 ribbon_types SELECT 차단도
+      해제(그대로 켜면 Phase 7에서 시뮬레이션이 죽는다)
+- [x] 검증: tsc 0에러 · JSX 가드 OK · 회귀 **165/165** (5·80·18·13·19·30 신규) ·
+      실제 DB로 `/api/company/master` HTTP 200 + 80치수 확인
+
 ### 남은 것
+- [ ] **서비스코아 계산 엔진** — 9F/65·F65 등 특수코아는 수용량을 바꾼다
+      (GPX90 45×450 = 12 또는 14). 조회 키에 코아를 넣어야 하며, 그때까지 해당 행은
+      API에서 제외(`core_spec_id IS NULL` 필터). 지금은 45×450이 노출되지 않는다
+- [ ] 200×300 무게 실측값 (`roll_weights` 비어 있음 — 현재 무게 없이 노출)
 - [ ] 주식 시뮬레이션 `/api/stocks` 하드코딩 → DB 교체 (별도)
 - [ ] 예외 규칙 반영: 600M·B128 수용량, 택배 직접담기, WL919 CLEAR (DB 조사 후 엔진 확장)
 
@@ -293,7 +320,11 @@
 ## 🔲 Phase 7 — 보안
 - [ ] RLS 정적 사용자 확인
 - [ ] 리본/라벨 테이블 RLS 활성화 + 차단
-- [ ] 시뮬레이션 테이블 RLS + SELECT 공개 허용
+      (⚠️ **ribbon_types · ribbon_specs 는 제외** — 시뮬레이션 드롭다운이 읽는다.
+       그대로 차단하면 박스 시뮬레이션이 죽는다. DB-02-rls-plan.md 참조)
+- [ ] 시뮬레이션 테이블 RLS + SELECT 공개 허용 (ribbon_types·ribbon_specs 포함)
+- [ ] `.env.local` 의 SUPABASE_SERVICE_ROLE_KEY 를 진짜 service_role 키로 교체
+      (현재 로컬 검증용 publishable 키. RLS 꺼져 있어 읽기만 동작)
 - [ ] /api/pallets 정상 응답 확인
 
 ---

@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import type { ProductInput, CompanyParams as CompanyParamsType } from '@/types/company';
-import { PALLETS } from '@/lib/company/data';
+import { PALLETS, getFabricOptions } from '@/lib/company/data';
 import { normalizeFabric } from '@/lib/company/fabric';
 
 interface Props {
@@ -79,7 +79,17 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
 
   function updateRow<K extends keyof RowState>(idx: number, key: K, value: RowState[K]) {
     setRows(prev =>
-      prev.map((r, i) => (i === idx ? { ...r, [key]: value } : r)),
+      prev.map((r, i) => {
+        if (i !== idx) return r;
+        const next = { ...r, [key]: value };
+        // 사이즈·미터가 바뀌면 원단 후보가 통째로 달라진다.
+        // 더 이상 유효하지 않은 원단 선택은 '미지정'으로 되돌린다.
+        if ((key === 'size' || key === 'meter') && next.fabric !== '') {
+          const options = getFabricOptions(Number(next.size), Number(next.meter));
+          if (!options.includes(next.fabric)) next.fabric = '';
+        }
+        return next;
+      }),
     );
   }
 
@@ -208,13 +218,18 @@ export default function CompanyParams({ onSubmit, isLoading }: Props) {
           <div style={{ display: 'flex', gap: '6px' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <label style={labelStyle}>원단</label>
-              <input
-                type="text"
+              <select
                 value={row.fabric}
                 onChange={e => updateRow(idx, 'fabric', e.target.value)}
-                placeholder="미지정"
-                style={compactInputStyle}
-              />
+                style={{ ...compactInputStyle, cursor: 'pointer' }}
+              >
+                <option value="">미지정</option>
+                {getFabricOptions(Number(row.size), Number(row.meter)).map(code => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <label style={labelStyle}>리더</label>

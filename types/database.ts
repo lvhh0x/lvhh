@@ -1,5 +1,12 @@
 // DB-01-schema.md 기반 — Supabase 시뮬레이션 테이블 타입
+//
+// <!-- 보류 (2026-07-13, 사용자 결정) — 전체 구조 완성 후 되살릴 것
 // ⚠️ 리본/라벨 테이블 타입은 이 파일에 추가하지 않는다
+// -->
+// 위 규칙은 보류한다. 박스 적재 시뮬레이션의 원단 드롭다운이 ribbon_types·ribbon_specs
+// 를 읽어야 하므로 두 테이블의 Row 타입을 추가했다. 아직 DB를 만드는 단계라
+// 스키마가 계속 자라며, 타입도 실제 컬럼과 함께 자라야 한다 (`as` 우회 금지).
+// 여전히 유효한 절대 원칙: DB 내용이 꼬이거나 삭제되는 일은 없어야 한다.
 
 export interface PalletType {
   id: number;
@@ -99,6 +106,32 @@ type RollBoxCapacityRow = {
   inner_box_id: number;
   qty: number;
   is_default: boolean;
+  // 특수코아(9F/65·F65 등)에 따라 수용량이 달라지는 행. NULL = 코아 무관.
+  // 시뮬레이션은 코아를 계산에 넣기 전까지 이 행들을 제외한다 (2026-07-13).
+  core_spec_id: number | null;
+  alt_qty: number | null;
+  alt_condition: string | null;
+  created_at: string | null;
+};
+
+// 원단 코드 마스터 — 원단 드롭다운 표시명 (2026-07-13)
+type RibbonTypeRow = {
+  id: number;
+  code: string;
+  description: string | null;
+  parent_id: number | null;
+  color: string | null;
+  winding: string | null;
+  created_at: string | null;
+};
+
+// 원단별로 존재하는 치수(폭×길이) 조합 — 원단 드롭다운 후보 산출 (2026-07-13)
+type RibbonSpecRow = {
+  id: number;
+  ribbon_type_id: number;
+  width_mm: number;
+  length_m: number;
+  raw_notes: string | null;
   created_at: string | null;
 };
 
@@ -143,6 +176,18 @@ export type Database = {
         Row: RollWeightRow;
         Insert: Omit<RollWeightRow, 'id' | 'created_at'>;
         Update: Partial<Omit<RollWeightRow, 'id' | 'created_at'>>;
+        Relationships: [];
+      };
+      ribbon_types: {
+        Row: RibbonTypeRow;
+        Insert: Omit<RibbonTypeRow, 'id' | 'created_at'>;
+        Update: Partial<Omit<RibbonTypeRow, 'id' | 'created_at'>>;
+        Relationships: [];
+      };
+      ribbon_specs: {
+        Row: RibbonSpecRow;
+        Insert: Omit<RibbonSpecRow, 'id' | 'created_at'>;
+        Update: Partial<Omit<RibbonSpecRow, 'id' | 'created_at'>>;
         Relationships: [];
       };
     };

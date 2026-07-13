@@ -12,6 +12,7 @@ interface Props {
   result: CompanyResult | null;
   isLoading: boolean;
   unsupported: { size: number; meter: number }[] | null;
+  ambiguous: { size: number; meter: number }[] | null;
 }
 
 function innerText(list: InnerBoxCount[]): string {
@@ -35,7 +36,7 @@ const card: React.CSSProperties = {
   marginBottom: '24px',
 };
 
-export default function CompanyResult({ result, isLoading, unsupported }: Props) {
+export default function CompanyResult({ result, isLoading, unsupported, ambiguous }: Props) {
   if (isLoading) {
     return (
       <div style={{ ...card, textAlign: 'center', color: '#9C9486' }}>
@@ -53,6 +54,19 @@ export default function CompanyResult({ result, isLoading, unsupported }: Props)
         <p style={{ fontFamily: 'var(--font-manrope), sans-serif', fontSize: '13px', margin: 0, lineHeight: 1.6 }}>
           지원하지 않는 제품입니다:{' '}
           {unsupported.map(u => `${u.size}×${u.meter}`).join(', ')}
+        </p>
+      </div>
+    );
+  }
+
+  // 치수는 있으나 원단마다 수용량이 갈리는 경우 — 추측하지 않고 원단 선택을 요구한다.
+  if (ambiguous && ambiguous.length > 0) {
+    return (
+      <div style={{ ...card, color: '#C9A86A' }}>
+        <div style={sectionLabel}>FABRIC REQUIRED</div>
+        <p style={{ fontFamily: 'var(--font-manrope), sans-serif', fontSize: '13px', margin: 0, lineHeight: 1.6 }}>
+          원단에 따라 박스 수용량이 달라지는 제품입니다. 원단을 선택하세요:{' '}
+          {ambiguous.map(u => `${u.size}×${u.meter}`).join(', ')}
         </p>
       </div>
     );

@@ -13,6 +13,7 @@ import master from '@/lib/company/master.json';
 
 const fixture: MasterData = {
   products: master.products.map((p) => ({
+    fabric: p.fabric,
     size: p.size,
     meter: p.meter,
     fullOuterQty: p.fullOuterQty,
@@ -24,6 +25,7 @@ const fixture: MasterData = {
       60: p.innerCapacity['60'],
     },
   })),
+  fabricsByDim: master.fabricsByDim,
   innerBoxes: master.innerBoxes.map((b) => ({
     kind: b.kind as InnerBoxKind,
     w: b.w,

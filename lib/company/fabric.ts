@@ -3,10 +3,18 @@
 
 import type { SizedInnerCount } from '@/types/company';
 
+/** 원단 미선택 표시값. 계산 시 공통 규칙(ProductSpec.fabric = null)으로 해석된다. */
+export const UNSPECIFIED_FABRIC = '미지정';
+
 /** 미입력('' / 공백) → '미지정'. 그 외엔 앞뒤 공백만 제거. */
 export function normalizeFabric(raw: string): string {
   const trimmed = raw.trim();
-  return trimmed === '' ? '미지정' : trimmed;
+  return trimmed === '' ? UNSPECIFIED_FABRIC : trimmed;
+}
+
+/** 표시용 원단명 → 스펙 조회 키. '미지정' → null(공통 규칙). */
+export function toFabricKey(fabric: string): string | null {
+  return fabric === UNSPECIFIED_FABRIC ? null : fabric;
 }
 
 /**

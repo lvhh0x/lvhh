@@ -11,7 +11,8 @@ import type {
   SizedInnerCount,
   PackedBox,
 } from '@/types/company';
-import { findProduct, findPallet, getOuterBoxSpec, getInnerBoxSpec } from './data';
+import { findProduct, findPallet, getOuterBoxSpec, getInnerBoxSpec, dimExists } from './data';
+import { toFabricKey } from './fabric';
 import { decomposeToInnerBoxes, mergeInnerBoxCounts } from './innerbox';
 import { packIntoBoxes, countOuterBoxes } from './outerbox';
 import { calcPallet } from './pallet';
@@ -25,7 +26,10 @@ import {
 
 export interface SimulateError {
   ok: false;
+  /** DB에 아예 없는 치수 */
   unsupported: { size: number; meter: number }[];
+  /** 치수는 있으나 원단마다 수용량이 갈려, 원단을 특정해야 계산 가능한 것 */
+  ambiguous: { size: number; meter: number }[];
 }
 export interface SimulateOk {
   ok: true;
@@ -36,16 +40,25 @@ export type SimulateOutcome = SimulateOk | SimulateError;
 export function simulate(params: CompanyParams): SimulateOutcome {
   const validInputs = params.products.filter(p => p.qty > 0);
 
-  const unsupported = validInputs
-    .filter(p => findProduct(p.size, p.meter) === null)
-    .map(p => ({ size: p.size, meter: p.meter }));
-  if (unsupported.length > 0) {
-    return { ok: false, unsupported };
+  const unsupported: { size: number; meter: number }[] = [];
+  const ambiguous: { size: number; meter: number }[] = [];
+  for (const p of validInputs) {
+    const fabric = toFabricKey(p.fabric);
+    if (findProduct(fabric, p.size, p.meter) !== null) continue;
+    // 원단 미지정인데 치수는 존재 = 원단별로 수용량이 갈리는 치수 → 원단 특정 필요
+    if (fabric === null && dimExists(p.size, p.meter)) {
+      ambiguous.push({ size: p.size, meter: p.meter });
+    } else {
+      unsupported.push({ size: p.size, meter: p.meter });
+    }
+  }
+  if (unsupported.length > 0 || ambiguous.length > 0) {
+    return { ok: false, unsupported, ambiguous };
   }
 
   // ① 인박스 분해 (제품별 — 사이즈 정보 유지)
   const perProduct: SizedInnerCount[][] = validInputs.map(input => {
-    const product = findProduct(input.size, input.meter)!;
+    const product = findProduct(toFabricKey(input.fabric), input.size, input.meter)!;
     return decomposeToInnerBoxes(product, input.qty, input.fabric);
   });
 

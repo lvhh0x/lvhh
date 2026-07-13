@@ -19,10 +19,22 @@
   },
 
   "products": [
-    { "size": 40,  "meter": 300, "fullOuterQty": 120, "fullOuterWeight": 15.92, "defaultInner": 145, "innerCapacity": { "145": 30, "95": 20, "60": 10 } },
-    { "size": 60,  "meter": 300, "fullOuterQty": 80,  "fullOuterWeight": 15.80, "defaultInner": 145, "innerCapacity": { "145": 20, "95": 10, "60": null } },
-    { "size": 110, "meter": 300, "fullOuterQty": 40,  "fullOuterWeight": 15.00, "defaultInner": 145, "innerCapacity": { "145": 10, "95": null, "60": null } }
+    { "fabric": null,    "size": 40,  "meter": 300, "fullOuterQty": 120, "fullOuterWeight": 15.92, "defaultInner": 145, "innerCapacity": { "145": 30, "95": 20, "60": 10 } },
+    { "fabric": "P-110", "size": 40,  "meter": 300, "fullOuterQty": 96,  "fullOuterWeight": null,   "defaultInner": 145, "innerCapacity": { "145": 24, "95": null, "60": null } },
+    { "fabric": null,    "size": 60,  "meter": 300, "fullOuterQty": 80,  "fullOuterWeight": 15.80, "defaultInner": 145, "innerCapacity": { "145": 20, "95": 10, "60": null } },
+    { "fabric": null,    "size": 110, "meter": 300, "fullOuterQty": 40,  "fullOuterWeight": 15.00, "defaultInner": 145, "innerCapacity": { "145": 10, "95": null, "60": null } },
+    { "fabric": "P-110", "size": 34,  "meter": 700, "fullOuterQty": 48,  "fullOuterWeight": null,   "defaultInner": 145, "innerCapacity": { "145": 12, "95": null, "60": null } },
+    { "fabric": "P-310", "size": 34,  "meter": 700, "fullOuterQty": 60,  "fullOuterWeight": null,   "defaultInner": 145, "innerCapacity": { "145": 15, "95": null, "60": null } }
   ],
+
+  "_products_주석": "34×700 은 공통 스펙이 없다 — P-110(12)과 P-310(15)이 수용량에 합의하지 않기 때문. 원단 미지정으로 입력하면 simulate() 가 ambiguous 로 거부한다. 40×300 은 공통(30)과 P-110 전용(24)이 공존하는 치수다.",
+
+  "fabricsByDim": {
+    "40_300":  ["B128", "B220", "B324", "B324M", "B325", "P-110"],
+    "60_300":  ["B128", "B220", "B324", "B324M", "B325"],
+    "110_300": ["B128", "B220", "B324", "B324M", "B325"],
+    "34_700":  ["P-110", "P-310"]
+  },
 
   "innerBoxes": [
     { "kind": 145, "w": 340, "d": 150, "h": 150, "tare": 0.22 },

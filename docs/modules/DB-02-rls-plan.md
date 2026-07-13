@@ -14,15 +14,25 @@
 
 | 그룹 | SELECT | WRITE |
 |------|--------|-------|
-| 리본/라벨 15개 | ❌ 차단 | ❌ 차단 |
+| 리본/라벨 (영업·거래처·라벨 시트) | ❌ 차단 | ❌ 차단 |
+| **ribbon_types · ribbon_specs** | **✅ 공개** | ❌ 차단 |
 | 시뮬레이션 (pallet_types 등) | ✅ 공개 | ❌ 차단 |
+
+> ⚠️ **`ribbon_types` · `ribbon_specs` 는 SELECT를 열어야 한다 (2026-07-13).**
+> 박스 적재 시뮬레이션의 원단 드롭다운이 이 두 테이블을 읽는다
+> (`/api/company/master`). 아래 Step 1 SQL은 원래 `ribbon_types` 를 통째로
+> 차단하도록 쓰여 있었는데, 그대로 실행하면 **시뮬레이션이 죽는다.**
+> 차단 대상에서 빼고, Step 2에서 SELECT 정책을 부여할 것.
+> `ribbon_specs` 는 애초에 이 문서 작성 시점에 없던 테이블이다.
 
 ---
 
 ## Step 1: 리본/라벨 전체 차단
 
 ```sql
-ALTER TABLE ribbon_types ENABLE ROW LEVEL SECURITY;
+-- ribbon_types 는 차단 대상에서 제외 (2026-07-13) — 시뮬레이션 드롭다운이 읽는다.
+-- 차단하려면 SELECT 정책을 함께 줘야 하므로 시뮬레이션 그룹으로 옮긴다.
+-- ALTER TABLE ribbon_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE label_specs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE delivery_routes ENABLE ROW LEVEL SECURITY;

@@ -17,6 +17,7 @@ import type {
   PackedBox,
 } from '@/types/company';
 import { getInnerBoxSpec, getOuterBoxSpec, findProduct, INNER_UNITS } from './data';
+import { toFabricKey } from './fabric';
 
 /**
  * 제품 1개 무게 (kg) — 꽉 찬 아웃박스 무게에서 tare 역산.
@@ -40,7 +41,7 @@ export function productUnitWeight(product: ProductSpec): number | null {
  * 무게 미실측 제품 포함 시 null.
  */
 export function calcProductWeight(input: ProductInput): number | null {
-  const product = findProduct(input.size, input.meter);
+  const product = findProduct(toFabricKey(input.fabric), input.size, input.meter);
   if (!product) return 0;
   const unit = productUnitWeight(product);
   if (unit === null) return null;
