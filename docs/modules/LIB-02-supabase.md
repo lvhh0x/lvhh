@@ -26,7 +26,14 @@ import type { Database } from '@/types/database';
 export function createServerClient() {
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!  // 클라이언트 노출 절대 금지
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,  // 클라이언트 노출 절대 금지
+    {
+      // Next.js Data Cache 가 supabase-js 의 GET fetch 를 저장해 낡은 데이터를
+      // 반환하는 사고 방지 (2026-07-14). 서버 조회는 항상 no-store.
+      global: {
+        fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }),
+      },
+    },
   );
 }
 ```
