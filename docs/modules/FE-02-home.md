@@ -1,5 +1,7 @@
 # FE-02 — 홈 페이지 (Home)
-> **상태: 🔴 미시작** | Phase 3에서 구현
+> **상태: ✅ 완료** | Phase 3 — 실브라우저 검증 2026-07-14 (7요소 정상, 콘솔 0에러)
+> 🐞 **미해결**: FeaturedStrategies 3카드가 `/stock/1·2·3`으로 링크되나 그런 종목 id가 없다.
+> `app/page.tsx`의 FEATURED id를 STOCK_CONFIGS의 실제 티커(`schd` 등)로 맞춰야 한다.
 > 의존: FE-01 (레이아웃), FE-07 (SVG 엔진)
 
 ---

@@ -1,5 +1,5 @@
 # LIB-01 — 시뮬레이션 연산 엔진
-> **상태: 🔴 미시작** | Phase 4(주식), Phase 5(회사)
+> **상태: ✅ 완료** | 주식=Python 엔진(Railway) · 회사=lib/company 엔진 7종 + simulate
 
 ## 역할
 

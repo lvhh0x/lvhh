@@ -1,5 +1,5 @@
 # LIB-02 — Supabase 클라이언트 설정
-> **상태: 🔴 미시작** | Phase 1–2 (가장 먼저)
+> **상태: ✅ 완료** | Phase 2 — server.ts는 `cache:'no-store'` 강제 (커밋 2fa9eef, 필수)
 
 ## 역할
 
@@ -100,5 +100,5 @@ Vercel 대시보드에도 동일하게 설정 필요.
 2. types/database.ts
 3. lib/supabase/server.ts
 4. lib/supabase/client.ts
-5. /api/pallets 연결 테스트
+5. /api/company/master 연결 테스트 (BE-04. 옛 /api/pallets는 폐기됨)
 6. npx tsc --noEmit

@@ -1,5 +1,5 @@
 # FE-06 — 회사 시뮬레이션 실행 (Company Run)
-> **상태: 🔴 미시작** | Phase 5
+> **상태: ✅ 완료** | Phase 5 Step 1~3 + Phase 6 (마스터 로드 3-상태, 원단 드롭다운)
 > 의존: FE-01, FE-07 (PalletSvg), LIB-01, BE-02, BE-03
 
 ---

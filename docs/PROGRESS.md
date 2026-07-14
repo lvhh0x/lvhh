@@ -57,7 +57,15 @@
 - [x] `components/home/StatsBand.tsx` (→ FE-02)
 - [x] `components/home/QuoteFooter.tsx` (→ FE-02)
 - [x] `app/page.tsx` — 홈 통합 (→ FE-02)
-- [ ] 홈 화면 브라우저 확인
+- [x] 홈 화면 브라우저 확인 (2026-07-14, Chrome 실브라우저 · lvhh.vercel.app)
+      FE-02 명세 7요소 전부 정상: 티커 / 상단바 / 히어로("정밀함" italic gold) /
+      진입타일 2 / 주요전략 3 / KPI 4(+18.4%·6·3·92.6%) / 인용구 푸터. 콘솔 에러 0
+- [x] 🐞 **홈 주요 전략 3카드 죽은 링크** (위 확인 중 발견 → **당일 해결**)
+      `app/page.tsx` FEATURED의 id가 `'1'/'2'/'3'`인데
+      `app/stock/[id]/page.tsx` STOCK_CONFIGS의 id는 `'schd'` 같은 티커였다.
+      `/stock/1` → "종목을 찾을 수 없습니다: 1". 홈의 나가는 링크 7개 중 3개가 죽어 있었다.
+      Phase 4.5 주식 라우팅 재설계 때 홈만 따라오지 않은 결과.
+      → 아래 **Phase 9(홈 개편 + 자료실)** 에서 MORE TOOLS 섹션으로 교체하며 소멸
 
 ---
 
@@ -84,7 +92,8 @@
 - [x] `python/requirements.txt`
 - [x] `python/Procfile`
 - [x] `python/config/config.ini.default`
-- [ ] 로컬 검증: `cd python && uvicorn main:app` → `curl /health`
+- [x] ~~로컬 검증: `cd python && uvicorn main:app` → `curl /health`~~
+      → 생략. Railway 실배포 서버로 대체 검증됨 (2026-07-14 `/stock/schd` 조회 정상)
 - [x] Railway/Render 배포 → `https://meridian-production-e345.up.railway.app`
 
 ### Step 2 — TypeScript 타입 & Next.js API Route ✅
@@ -107,7 +116,8 @@
 - [x] `app/stock/[id]/page.tsx` (2패널 레이아웃 통합, Client Component)
 - [x] `npx tsc --noEmit` 통과
 - [x] Vercel 빌드 확인 (push 후 자동 배포)
-- [ ] `/stock/schd` 전체 흐름 확인 (Python 서버 기동 후)
+- [x] `/stock/schd` 전체 흐름 확인 (2026-07-14, Chrome 실브라우저)
+      2패널 렌더 + 조회기간 2011-10~2026-07 수신 → Railway 서버 응답 정상
 
 ### Step 5 — 문서 업데이트 ✅
 - [x] PROGRESS.md Phase 4 체크리스트 완료 처리
@@ -307,6 +317,18 @@
 - [x] 검증: tsc 0에러 · JSX 가드 OK · 회귀 **165/165** (5·80·18·13·19·30 신규) ·
       실제 DB로 `/api/company/master` HTTP 200 + 80치수 확인
 
+### Step 2.5 — 캐시 버그 수정 + 고객사 스펙 데이터 입력 ✅ (세션: DB데이타저장, 2026-07-14)
+- [x] 🐞 **치명 버그 수정** (커밋 `2fa9eef`) — Next.js Data Cache가 supabase-js의 GET fetch를
+      캐싱해 `/api/company/master`가 **하루 지난 행**을 내려주고 있었다.
+      `lib/supabase/server.ts`에 `cache: 'no-store'` 강제.
+      ⚠️ **HTTP 200은 신선도를 증명하지 않는다 — 응답 본문으로 검증할 것**
+- [x] 고객사 스펙 3사 입력: 정인테크(7) · B112 해동(5) · 티옵시스(7)
+      = customer_product_specs 18링크, 마이그레이션 11건
+- [x] 스키마 확장(가산적): `customer_product_specs.outer_box_id` ·
+      `.delivery_route_id` · `roll_box_capacities.raw_notes`
+- [x] 신규 코아 코드 9F/60 · 4F/60 · 4F/65, 67C 정의 확정
+- [x] 검증: tsc 0 · 회귀 165/165 · 실 API 200 + 신규 행 포함 확인
+
 ### 남은 것
 - [ ] **서비스코아 계산 엔진** — 9F/65·F65 등 특수코아는 수용량을 바꾼다
       (GPX90 45×450 = 12 또는 14). 조회 키에 코아를 넣어야 하며, 그때까지 해당 행은
@@ -314,6 +336,44 @@
 - [ ] 200×300 무게 실측값 (`roll_weights` 비어 있음 — 현재 무게 없이 노출)
 - [ ] 주식 시뮬레이션 `/api/stocks` 하드코딩 → DB 교체 (별도)
 - [ ] 예외 규칙 반영: 600M·B128 수용량, 택배 직접담기, WL919 CLEAR (DB 조사 후 엔진 확장)
+
+---
+
+## ✅ Phase 9 — 홈 개편 + 자료실 (2026-07-14, 세션: 홈페이지)
+
+> 홈의 주요 전략 3카드가 전부 죽은 링크였다. 고치는 대신 **그 자리를 새 기능으로 바꾼다**
+> (사용자 결정). 3번째 칸 = 자료실, 1·2번 칸 = 준비 중.
+
+### 전제 — 보존 목록 해제 (사용자 승인)
+- [x] MASTER.md 규칙 8의 보존 목록에서 `app/page.tsx` · `components/home/**` **해제**
+      (주석 보류). 홈을 의도적으로 개편하는 단계라 잠가둘 수 없다.
+      나머지(`app/stock/**` 등)는 그대로 잠근 상태 유지
+
+### DB (가산적 — 기존 27테이블 무접촉)
+- [x] `archive_files` 테이블 신설 (title/description/storage_path/file_name/
+      size_bytes/mime_type/sort_order/created_at)
+- [x] Storage 공개 버킷 `archive` 생성
+- [x] `types/database.ts` 에 ArchiveFileRow 추가 (`as` 우회 없음)
+
+### 코드
+- [x] `types/archive.ts` — ArchiveFile 계약 (downloadUrl은 서버가 붙인다)
+- [x] `app/api/archive/route.ts` (BE-05) — 목록 + Storage 공개 URL. force-dynamic
+- [x] `app/archive/page.tsx` (FE-08) — 3-상태(loading/ok/error) + 빈 목록 상태
+- [x] `lib/home/tools.ts` + `components/home/ToolTile.tsx` + `MoreTools.tsx` (FE-09)
+      — 시각 규격은 기존 SimTile 과 동일. 새 디자인 토큰 없음
+- [x] `app/page.tsx` — FeaturedStrategies → MoreTools 교체, 죽은 STOCK_SIMS 제거
+- [x] `components/home/FeaturedStrategies.tsx` **삭제** (교체로 고아가 됨, 사용자 승인)
+
+### 검증
+- [x] typecheck 0에러 · JSX 한글 가드 OK · **회귀 165/165** · `npm run build` 성공
+- [x] 실브라우저: 홈 MORE TOOLS 3칸(준비중 2 + 자료실 OPEN→) 육안 확인
+- [x] 실브라우저: `/archive` 로딩 → 목록 1건 렌더 (제목·설명·파일명·17.2MB·날짜)
+- [x] 공개 다운로드 URL 익명 요청 → **HTTP 200 · 17,989,840 bytes** (등록 용량과 일치)
+
+### 남은 것
+- [ ] 홈 1·2번 칸에 넣을 기능 2개 미정 (현재 '준비 중' 비활성 타일)
+- [ ] 자료실 운영: 대시보드로 파일 업로드 → `archive_files` 행 추가.
+      자료가 잦아지면 등록 절차 간소화를 재검토
 
 ---
 
@@ -325,7 +385,8 @@
 - [ ] 시뮬레이션 테이블 RLS + SELECT 공개 허용 (ribbon_types·ribbon_specs 포함)
 - [ ] `.env.local` 의 SUPABASE_SERVICE_ROLE_KEY 를 진짜 service_role 키로 교체
       (현재 로컬 검증용 publishable 키. RLS 꺼져 있어 읽기만 동작)
-- [ ] /api/pallets 정상 응답 확인
+- [ ] `/api/company/master` 정상 응답 확인 (RLS 켠 뒤 — 여기서 죽으면 시뮬레이션이 죽는다)
+      ※ 옛 계획의 `/api/pallets`는 만들지 않았다 (BE-02 폐기, BE-04로 통합)
 
 ---
 
@@ -369,3 +430,8 @@
 | 2026-07-03 | Phase 5-Step3-4 | 원단 타입 도입 + 무게 표시 분리 (fabric.ts 신규 + types/innerbox/outerbox/simulate + CompanyParams/BoxSvg/CompanyResult), 검증 17/17 + 회귀 19·5·80, 커밋 a26307a·34a44a6 | Claude Opus 4.8 |
 | 2026-07-04 | Phase 5-Step3-5 | 통합 검증 (test-step3-5 신규 13/13 + 회귀 4종 무영향 + 실브라우저 5개 항목 육안) → Phase 5 Step 3 종결 | Claude Opus 4.8 |
 | 2026-07-11 | Phase 6-Step1 | 박스 시뮬레이션 DB 전환 (roll_weights 신설 + master API + data.ts 하이드레이션 + weightIncomplete 제거), 회귀 134/134 | Claude Fable 5 |
+| 2026-07-13 | Phase 6-Step2 | 특수 원단 노출 + 원단 드롭다운 (스펙 키 = 원단×사이즈×미터, 20→80치수, 미상 거부 ambiguous, 무게 조회 버그 수정), 회귀 165/165, 커밋 5392ba6 | Claude Opus 4.8 |
+| 2026-07-14 | Phase 6-Step2.5 | Data Cache 낡은 응답 버그 수정(커밋 2fa9eef) + 고객사 3사 스펙 입력(정인테크·B112해동·티옵시스) + 스키마 가산 확장 | Claude Opus 4.8 |
+| 2026-07-14 | Phase 3 검증 | 홈 화면 실브라우저 확인 완료 — FE-02 7요소 정상 / 콘솔 0에러 / **주요전략 3카드 죽은 링크 발견(미수정)** | Claude Opus 4.8 |
+| 2026-07-14 | 문서 정합 | MASTER.md·PROGRESS.md를 실제 상태로 동기화 (현재 단계 Phase 6, BE-02·03 폐기→BE-04, DB 행수·RLS 27개 실측 반영), 모듈문서 11개 상태 헤더 정정 + DB-01 재작성 + BE-04 신설 | Claude Opus 4.8 |
+| 2026-07-14 | Phase 9 | 홈 개편 + 자료실 (archive_files + 공개버킷 + BE-05 + FE-08 + MORE TOOLS 3칸). 죽은 링크 3개 소멸. 회귀 165/165 · 실브라우저 + 실다운로드 검증 | Claude Opus 4.8 |

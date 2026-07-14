@@ -1,5 +1,5 @@
 # FE-03 — 주식 목록 (Stock List)
-> **상태: 🔴 미시작** | Phase 4
+> **상태: ✅ 완료** | Phase 4 → Phase 4.5에서 6타일 그리드로 재설계 (lib/stock/tiles.ts)
 > 의존: FE-01 (InnerHeader), FE-07 (LineSvg), BE-01 (API)
 
 ---

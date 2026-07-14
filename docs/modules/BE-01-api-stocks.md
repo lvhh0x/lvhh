@@ -1,5 +1,5 @@
 # BE-01 — API: 주식 목록 (/api/stocks)
-> **상태: 🔴 미시작** | Phase 4
+> **상태: ✅ 완료** | Phase 4 — ⚠️ 종목 목록(STOCK_CONFIGS)은 아직 하드코딩. DB 교체는 미착수
 
 ## 역할
 

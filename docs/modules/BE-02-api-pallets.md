@@ -1,5 +1,8 @@
 # BE-02 — API: 팔레트 (/api/pallets)
-> **상태: 🔴 미시작** | Phase 5 (DB 연동 포함)
+> **상태: ⛔ 폐기 (2026-07-14)** — 이 엔드포인트는 만들지 않았다.
+> Phase 6 Step 1에서 `app/api/company/master/route.ts`(BE-04)가 pallet_types를 포함한
+> 5개 테이블을 한 번에 조회해 MasterData로 조립하는 방식으로 대체됐다.
+> 아래 명세는 폐기된 설계의 기록으로만 남긴다.
 > ⚠️ pallet_types 테이블에 `per_layer` 커럼 없음 — 쫐가 여부 사용자 확인 필요
 
 ## 역할

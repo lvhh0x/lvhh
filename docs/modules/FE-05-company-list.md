@@ -1,5 +1,5 @@
 # FE-05 — 회사 목록 (Company List)
-> **상태: 🔴 미시작** | Phase 5
+> **상태: ✅ 완료** | Phase 5 Step 1
 > 의존: FE-01 (InnerHeader), FE-07 (IconSvg)
 
 ---

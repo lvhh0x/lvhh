@@ -1,5 +1,8 @@
 # BE-03 — API: 제품 (/api/products)
-> **상태: 🔴 미시작** | Phase 5
+> **상태: ⛔ 폐기 (2026-07-14)** — 이 엔드포인트는 만들지 않았다.
+> 제품 스펙은 `app/api/company/master/route.ts`(BE-04)가 roll_box_capacities·
+> ribbon_specs 등에서 조립해 MasterData.products로 내려준다.
+> 아래 명세는 폐기된 설계의 기록으로만 남긴다.
 
 ## 역할
 

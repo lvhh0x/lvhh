@@ -145,9 +145,29 @@ type RollWeightRow = {
   created_at: string | null;
 };
 
+// 자료실(BE-05) — 공개 다운로드 자료 목록 (2026-07-14)
+// 파일 실물은 Storage 버킷 'archive'. 업로드는 대시보드에서 관리자가 직접.
+type ArchiveFileRow = {
+  id: number;
+  title: string;
+  description: string | null;
+  storage_path: string;
+  file_name: string;
+  size_bytes: number | null;
+  mime_type: string | null;
+  sort_order: number;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
+      archive_files: {
+        Row: ArchiveFileRow;
+        Insert: Omit<ArchiveFileRow, 'id' | 'created_at'>;
+        Update: Partial<Omit<ArchiveFileRow, 'id' | 'created_at'>>;
+        Relationships: [];
+      };
       pallet_types: {
         Row: PalletTypeRow;
         Insert: Omit<PalletTypeRow, 'id' | 'created_at'>;

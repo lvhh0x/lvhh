@@ -84,7 +84,7 @@ CREATE POLICY "public_read" ON simulation_products FOR SELECT TO anon USING (tru
 [ ] 2. Step 1 SQL 실행
 [ ] 3. 기존 리본/라벨 시스템 정상 확인 (service_role key 사용 안하면 RLS 우회됨)
 [ ] 4. Step 2 SQL 실행
-[ ] 5. /api/pallets 정상 응답 확인
+[ ] 5. /api/company/master 정상 응답 확인 (BE-04. 옛 /api/pallets는 폐기됨)
 ```
 
 > service_role key 사용 앱은 RLS 우회 — 기존 비즈니스 시스템 영향 없음

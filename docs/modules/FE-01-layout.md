@@ -1,5 +1,5 @@
 # FE-01 — 레이아웃 (Layout)
-> **상태: 🔴 미시작** | Phase 2에서 구현
+> **상태: ✅ 완료** | Phase 2 (Ticker, InnerHeader)
 > 의존: LIB-02 (Supabase 클라이언트 설정 먼저 완료)
 
 ---

@@ -1,5 +1,5 @@
 # FE-04 — 주식 시뮬레이션 실행 (Stock Run)
-> **상태: 🔴 미시작** | Phase 4
+> **상태: ✅ 완료** | Phase 4 + Phase 4.5 (range 3-상태, /stock/etf 직접입력)
 > 의존: FE-01, FE-07 (LineSvg, CandleSvg), LIB-01 (computeStock)
 
 ---
