@@ -55,7 +55,9 @@ function compressSized(items: FlatInner[]): SizedInnerCount[] {
   type Entry = FlatInner & { count: number };
   const map = new Map<string, Entry>();
   for (const item of items) {
-    const key = `${item.fabric}_${item.size}_${item.meter}_${item.kind}`;
+    // 박스당 수량(productQtyPerBox)도 키에 넣는다: 같은 종류라도 꽉 찬 박스와
+    // 부분 박스는 담긴 개수가 달라, 합치면 productQty(=count×박스당수량)가 틀린다.
+    const key = `${item.fabric}_${item.size}_${item.meter}_${item.kind}_${item.productQtyPerBox}`;
     const existing = map.get(key);
     if (existing) {
       existing.count += 1;

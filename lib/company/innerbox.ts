@@ -30,37 +30,36 @@ export function decomposeToInnerBoxes(
   if (available.length === 0) return [];
 
   const largest = available[0];
-  const counts = new Map<InnerBoxKind, number>();
+  const result: SizedInnerCount[] = [];
   let rem = qty;
 
-  // 가장 큰 박스로 꽉 채우기
+  const mk = (kind: InnerBoxKind, count: number, productQty: number): SizedInnerCount => ({
+    fabric,
+    size: product.size,
+    meter: product.meter,
+    kind,
+    count,
+    productQty,
+  });
+
+  // 가장 큰 박스로 꽉 채우기 — 각 박스는 정확히 cap개씩 (productQty = 박스수 × cap)
   if (rem >= largest.cap) {
     const n = Math.floor(rem / largest.cap);
-    counts.set(largest.kind, n);
+    result.push(mk(largest.kind, n, n * largest.cap));
     rem -= n * largest.cap;
   }
 
-  // 나머지 → cap >= rem 인 가장 작은 박스 1개
+  // 나머지 rem개 → cap >= rem 인 가장 작은 박스 1개.
+  // 이 박스엔 rem개만 담기므로 productQty = rem (박스 수용량이 아니다).
+  // 같은 종류 박스가 꽉 찬 것과 부분인 것으로 나뉠 수 있어 별도 항목으로 둔다 →
+  // 모든 항목이 '박스당 균일 수량'을 유지해 outerbox 재분배가 정확해진다.
   if (rem > 0) {
     const candidates = available.filter(b => b.cap >= rem);
     const pick = candidates.length > 0 ? candidates[candidates.length - 1] : largest;
-    counts.set(pick.kind, (counts.get(pick.kind) ?? 0) + 1);
+    result.push(mk(pick.kind, 1, rem));
   }
 
-  return KINDS
-    .filter(k => (counts.get(k) ?? 0) > 0)
-    .map(k => {
-      const count = counts.get(k)!;
-      const cap = product.innerCapacity[k] as number;
-      return {
-        fabric,
-        size: product.size,
-        meter: product.meter,
-        kind: k,
-        count,
-        productQty: count * cap,
-      };
-    });
+  return result;
 }
 
 /**

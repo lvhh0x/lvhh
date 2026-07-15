@@ -110,7 +110,8 @@ export interface SizedInnerCount {
   meter: number;       // 제품 미터 (m)
   kind: InnerBoxKind;  // 인박스 종류: 145 | 95 | 60
   count: number;       // 이 사이즈+종류 인박스 개수
-  productQty: number;  // 이 인박스들에 담긴 제품 개수 (= count × innerCapacity[kind])
+  productQty: number;  // 이 인박스들에 담긴 실제 제품 개수. 꽉 찬 박스는 count×수용량,
+                       // 마지막 부분 박스는 실제 담긴 수(수용량 미만일 수 있다)
 }
 
 export interface PackedBox {
