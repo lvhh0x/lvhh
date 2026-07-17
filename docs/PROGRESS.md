@@ -377,16 +377,60 @@
 
 ---
 
-## 🔲 Phase 7 — 보안
-- [ ] RLS 정적 사용자 확인
-- [ ] 리본/라벨 테이블 RLS 활성화 + 차단
-      (⚠️ **ribbon_types · ribbon_specs 는 제외** — 시뮬레이션 드롭다운이 읽는다.
-       그대로 차단하면 박스 시뮬레이션이 죽는다. DB-02-rls-plan.md 참조)
-- [ ] 시뮬레이션 테이블 RLS + SELECT 공개 허용 (ribbon_types·ribbon_specs 포함)
-- [ ] `.env.local` 의 SUPABASE_SERVICE_ROLE_KEY 를 진짜 service_role 키로 교체
-      (현재 로컬 검증용 publishable 키. RLS 꺼져 있어 읽기만 동작)
-- [ ] `/api/company/master` 정상 응답 확인 (RLS 켠 뒤 — 여기서 죽으면 시뮬레이션이 죽는다)
-      ※ 옛 계획의 `/api/pallets`는 만들지 않았다 (BE-02 폐기, BE-04로 통합)
+## ✅ Phase 7 — 보안 (2026-07-17 완료, 세션: 페이즈7및기타)
+
+> **28개 테이블 전부 RLS 활성화 · 정책 0개(전면 차단).** 앱은 무영향
+> (`/api/company/master` 200 · 37,787바이트 · 227제품 — 변경 전과 동일).
+
+- [x] **키 교체 먼저** — `.env.local`의 `SUPABASE_SERVICE_ROLE_KEY`를 **secret 키
+      (`sb_secret_…`)** 로 교체. 교체 전엔 **anon 키와 글자 하나까지 같은 값**이었다
+      (실측). Vercel도 같은 secret 키로 덮어쓰고 재배포.
+      ⚠️ 이 프로젝트는 Supabase **신규 키 체계**다 — 옛 `service_role` JWT가 아니라
+      **secret 키**가 맞는 짝이다 (`publishable` ↔ `secret`).
+- [x] **순서를 바로잡았다.** 옛 체크리스트는 키 교체를 RLS *뒤에* 뒀는데 그러면
+      로컬이 죽고, 무엇보다 **RLS를 켜기 전엔 새 키가 되는지 확인할 방법이 없다.**
+      올바른 순서 = **키 → 확인 → RLS → 확인.**
+- [x] **A그룹(20개, 앱이 안 읽음) 먼저** — `customers`·`products`·`label_specs`·
+      `customer_product_specs`·`delivery_routes` 등 **영업 데이터 전부**가 여기다.
+      아무 코드도 안 읽으므로 **무위험**이고 Vercel 키와도 무관.
+- [x] **B그룹(8개, 앱이 읽음)** — `inner_box_types`·`outer_box_types`·`pallet_types`·
+      `roll_box_capacities`·`roll_weights`·`ribbon_specs`·`ribbon_types`·`archive_files`.
+- [x] **`/api/company/master` 정상 확인** — 227제품·무게19·원단19·인박스3·아웃박스2·
+      파렛트5. `X-Vercel-Cache: MISS` + 캐시버스터 URL로 **신선도까지 확인**
+      (HTTP 200은 신선도를 증명하지 않는다).
+
+### ⚠️ 옛 계획의 "ribbon_types · ribbon_specs SELECT 열어두기"는 **폐기**
+
+**공개 SELECT 정책은 하나도 만들지 않았다.** 그 계획은 **브라우저가 anon 키로 직접
+읽는다**는 전제 위에 있었는데, 실측 결과 그런 코드는 없다:
+
+- `.from()` 호출은 **전부 2개 라우트**뿐 — `/api/company/master`, `/api/archive`.
+  둘 다 서버에서 `lib/supabase/server.ts`(secret 키)로 읽는다.
+- `lib/supabase/client.ts`(anon 키)는 **아무도 import하지 않는다**.
+- 파이썬/Railway 백엔드는 Supabase를 **아예 안 쓴다**.
+- **secret 키는 RLS를 우회한다** → 전면 차단이 더 안전하고 더 단순하다.
+
+**신규 테이블을 만들 때도 정책은 필요 없다.** `ENABLE ROW LEVEL SECURITY`만 켜면 된다.
+
+### 실측 기록 (가정 아님)
+
+| 항목 | 전 | 후 |
+|------|-----|-----|
+| RLS 켜진 테이블 | 0 / 28 | **28 / 28** |
+| anon 키로 `customers`(185) 읽기 | **읽힘** | **0행 — 차단** |
+| anon 키로 INSERT | — | **401 / 42501 차단** |
+| 보안 어드바이저 | **ERROR 28** | **ERROR 0** (INFO 28 = 의도한 설계) |
+
+되돌리기: `ALTER TABLE <t> DISABLE ROW LEVEL SECURITY;`
+
+### 남은 것 (Phase 7 범위 밖)
+- [ ] `archive` **스토리지 버킷은 여전히 공개** — 테이블 RLS와 별개. 대외비 자료를
+      올리려면 비공개 버킷 + 인증이 먼저다.
+- [ ] `lib/supabase/client.ts` 삭제 + Vercel의 `NEXT_PUBLIC_SUPABASE_ANON_KEY` 제거
+      (아무도 안 쓰는데, 누가 import하면 그 순간 anon 키가 브라우저로 나간다).
+      **`NEXT_PUBLIC_SUPABASE_URL`은 서버가 쓰므로 유지.**
+
+※ 옛 계획의 `/api/pallets`는 만들지 않았다 (BE-02 폐기, BE-04로 통합)
 
 ---
 
